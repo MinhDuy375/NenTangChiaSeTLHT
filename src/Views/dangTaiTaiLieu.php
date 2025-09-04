@@ -1,6 +1,7 @@
 <?php
 // upload_tai_lieu.php - Trang upload tài liệu
-include '../../config/ket_noi_csdl.php';
+include __DIR__ . '/../../config/ketNoiDB.php';
+
 
 $thong_bao = '';
 $loai_thong_bao = '';
@@ -99,21 +100,22 @@ try {
         
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+           
             min-height: 100vh;
-            padding: 20px;
+            
         }
         
         .container {
             max-width: 800px;
-            margin: 0 auto;
+            margin: 10px auto;
             background: white;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+           
+           
             overflow: hidden;
         }
         
         .header {
+            
             background: linear-gradient(45deg, #2196F3, #21CBF3);
             color: white;
             padding: 30px;
@@ -281,8 +283,8 @@ try {
         </div>
         
         <div class="nav-menu">
-            <a href="upload_tai_lieu.php" class="active">Upload Tài Liệu</a>
-            <a href="danh_sach_mon_hoc.php">Danh Sách Môn Học</a>
+            <a href="dangTaiTaiLieu.php" class="active">Upload Tài Liệu</a>
+            <a href="./src/Views/danhSachMon.php">Danh Sách Môn Học</a>
         </div>
         
         <div class="form-container">

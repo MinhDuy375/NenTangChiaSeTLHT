@@ -1,7 +1,7 @@
 <?php
 // danh_sach_mon_hoc.php - Trang hiển thị danh sách môn học
 // Đặt file này trong thư mục src/Views/
-include '../../config/ket_noi_csdl.php';
+include __DIR__ . '/../../config/ketNoiDB.php';
 
 // Lấy danh sách môn học cùng số lượng tài liệu
 try {
@@ -44,21 +44,18 @@ try {
         * {
             margin: 0;
             padding: 0;
-            box-sizing: border-box;
+            
         }
         
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
+           
         }
         
         .container {
-            max-width: 1200px;
+            
             margin: 0 auto;
             background: white;
-            border-radius: 15px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.2);
             overflow: hidden;
         }
@@ -66,12 +63,12 @@ try {
         .header {
             background: linear-gradient(45deg, #2196F3, #21CBF3);
             color: white;
-            padding: 30px;
+            padding: 15px;
             text-align: center;
         }
         
-        .header h1 {
-            font-size: 2.5em;
+        .header h2 {
+            font-size: 2em;
             margin-bottom: 10px;
         }
         
@@ -80,27 +77,8 @@ try {
             opacity: 0.9;
         }
         
-        .nav-menu {
-            background: #f8f9fa;
-            padding: 15px;
-            text-align: center;
-            border-bottom: 1px solid #dee2e6;
-        }
         
-        .nav-menu a {
-            text-decoration: none;
-            color: #495057;
-            margin: 0 15px;
-            padding: 8px 16px;
-            border-radius: 5px;
-            transition: all 0.3s;
-            font-weight: 500;
-        }
-        
-        .nav-menu a:hover, .nav-menu a.active {
-            background: #007bff;
-            color: white;
-        }
+
         
         .stats-container {
             display: grid;
@@ -116,12 +94,9 @@ try {
             border-radius: 12px;
             text-align: center;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            transition: transform 0.3s;
+            
         }
         
-        .stat-card:hover {
-            transform: translateY(-5px);
-        }
         
         .stat-number {
             font-size: 2.5em;
@@ -169,16 +144,12 @@ try {
         .mon-hoc-card {
             background: white;
             border: 1px solid #e1e5e9;
-            border-radius: 12px;
             overflow: hidden;
-            transition: all 0.3s;
             box-shadow: 0 2px 10px rgba(0,0,0,0.08);
             cursor: pointer;
         }
         
         .mon-hoc-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
             border-color: #007bff;
         }
         
@@ -186,24 +157,13 @@ try {
             background: linear-gradient(45deg, #007bff, #0056b3);
             color: white;
             padding: 20px;
-            position: relative;
             overflow: hidden;
         }
         
-        .mon-hoc-header::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            right: 0;
-            width: 100px;
-            height: 100px;
-            background: rgba(255,255,255,0.1);
-            border-radius: 50%;
-            transform: translate(30%, -30%);
-        }
+
         
         .mon-hoc-title {
-            font-size: 1.3em;
+            font-size: 1em;
             font-weight: 600;
             margin-bottom: 5px;
             position: relative;
@@ -221,15 +181,6 @@ try {
             padding: 20px;
         }
         
-        .mon-hoc-description {
-            color: #6c757d;
-            line-height: 1.6;
-            margin-bottom: 15px;
-            display: -webkit-box;
-            -webkit-line-clamp: 3;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
         
         .mon-hoc-actions {
             display: flex;
@@ -297,10 +248,7 @@ try {
         }
         
         @media (max-width: 768px) {
-            .container {
-                margin: 10px;
-                border-radius: 10px;
-            }
+          
             
             .header {
                 padding: 20px;
@@ -329,13 +277,7 @@ try {
 <body>
     <div class="container">
         <div class="header">
-            <h1>📚 Thư Viện Tài Liệu</h1>
-            <p>Khám phá và tải xuống tài liệu học tập chất lượng cao</p>
-        </div>
-        
-        <div class="nav-menu">
-            <a href="upload_tai_lieu.php">Upload Tài Liệu</a>
-            <a href="danh_sach_mon_hoc.php" class="active">Danh Sách Môn Học</a>
+            <h2>Thư Viện Tài Liệu</h2>
         </div>
         
         <div class="stats-container">
@@ -372,7 +314,7 @@ try {
                 <div class="empty-state">
                     <h3>📚 Chưa có môn học nào</h3>
                     <p>Hệ thống chưa có môn học nào được thêm vào.</p>
-                    <a href="upload_tai_lieu.php" class="btn btn-primary">
+                    <a href="dangTaiTaiLieu.php" class="btn btn-primary">
                         <span class="icon">➕</span> Upload Tài Liệu Đầu Tiên
                     </a>
                 </div>
@@ -389,18 +331,10 @@ try {
                                 </div>
                             </div>
                             <div class="mon-hoc-body">
-                                <div class="mon-hoc-description">
-                                    <?php 
-                                    if (!empty($mon_hoc['mo_ta'])) {
-                                        echo lam_sach_chuoi($mon_hoc['mo_ta']);
-                                    } else {
-                                        echo "Môn học " . lam_sach_chuoi($mon_hoc['ten_mon']) . " với nhiều tài liệu học tập hữu ích.";
-                                    }
-                                    ?>
-                                </div>
+                          
                                 <div class="mon-hoc-actions">
                                     <?php if ($mon_hoc['so_luong_tai_lieu'] > 0): ?>
-                                        <a href="tai_lieu_theo_mon.php?id_mon_hoc=<?php echo $mon_hoc['id']; ?>" 
+                                        <a href="taiLieuMon.php?id_mon_hoc=<?php echo $mon_hoc['id']; ?>" 
                                            class="btn btn-primary">
                                             <span class="icon">👁️</span> Xem Tài Liệu
                                         </a>
@@ -462,18 +396,7 @@ try {
         
         // Thêm hiệu ứng khi hover vào card
         document.querySelectorAll('.mon-hoc-card').forEach(card => {
-            card.addEventListener('mouseenter', function() {
-                this.style.transform = 'translateY(-5px) scale(1.02)';
-            });
             
-            card.addEventListener('mouseleave', function() {
-                const searchTerm = document.getElementById('search-input').value.toLowerCase().trim();
-                if (searchTerm.length > 0) {
-                    this.style.transform = 'translateY(-2px)';
-                } else {
-                    this.style.transform = '';
-                }
-            });
             
             // Click vào card để chuyển trang
             card.addEventListener('click', function(e) {
@@ -488,15 +411,7 @@ try {
         });
         
         // Thêm hiệu ứng loading khi chuyển trang
-        document.querySelectorAll('a[href]').forEach(link => {
-            link.addEventListener('click', function() {
-                const btn = this;
-                if (!btn.classList.contains('btn-outline')) {
-                    btn.innerHTML = '<span class="icon">⏳</span> Đang tải...';
-                    btn.style.pointerEvents = 'none';
-                }
-            });
-        });
+
         
         // Auto focus vào search box
         document.addEventListener('DOMContentLoaded', function() {

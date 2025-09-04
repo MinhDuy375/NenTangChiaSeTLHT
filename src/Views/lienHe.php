@@ -6,9 +6,6 @@
     <title>Document</title>
 </head>
 <body>
-    <p>Trang chủ</p>
-    <div>
-        
-    </div>
+    trang liên hệ chúng tôi
 </body>
 </html>
