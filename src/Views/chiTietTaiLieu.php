@@ -1,13 +1,13 @@
 <?php
 // chi_tiet_tai_lieu.php - Trang chi tiết tài liệu với preview
 // Đặt file này trong thư mục src/Views/
-include '../../config/ket_noi_csdl.php';
+include __DIR__ . '/../../config/ketNoiDB.php';
 
 // Lấy ID tài liệu từ URL
 $id_tai_lieu = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 
 if ($id_tai_lieu <= 0) {
-    header('Location: danh_sach_mon_hoc.php');
+    header('Location: danhSachMon.php');
     exit;
 }
 
@@ -24,7 +24,7 @@ try {
     $tai_lieu = $stmt->fetch();
     
     if (!$tai_lieu) {
-        header('Location: danh_sach_mon_hoc.php');
+        header('Location: danhSachMon.php');
         exit;
     }
 } catch (PDOException $e) {
@@ -444,15 +444,15 @@ function tinh_kich_thuoc_file($duong_dan_file) {
     <div class="container">
         <div class="header">
             <div class="breadcrumb">
-                <a href="danh_sach_mon_hoc.php">🏠 Trang chủ</a> / 
-                <a href="danh_sach_mon_hoc.php">Danh sách môn học</a> / 
-                <a href="tai_lieu_theo_mon.php?id_mon_hoc=<?php echo $tai_lieu['id_mon_hoc']; ?>">
+                <a href="danhSachMon.php">🏠 Trang chủ</a> / 
+                <a href="danhSachMon.php">Danh sách môn học</a> / 
+                <a href="taiLieuMon.php?id_mon_hoc=<?php echo $tai_lieu['id_mon_hoc']; ?>">
                     <?php echo lam_sach_chuoi($tai_lieu['ten_mon']); ?>
                 </a> / 
                 Chi tiết tài liệu
             </div>
             <div class="header-title">
-                <a href="tai_lieu_theo_mon.php?id_mon_hoc=<?php echo $tai_lieu['id_mon_hoc']; ?>" 
+                <a href="taiLieuMon.php?id_mon_hoc=<?php echo $tai_lieu['id_mon_hoc']; ?>" 
                    class="back-btn">
                     ← Quay lại
                 </a>
