@@ -1,6 +1,6 @@
 -- MySQL dump 10.13  Distrib 8.0.43, for Win64 (x86_64)
 --
--- Host: 127.0.0.1    Database: chiasetailieudb
+-- Host: localhost    Database: chiasetailieudb
 -- ------------------------------------------------------
 -- Server version	8.0.43
 
@@ -24,19 +24,19 @@ DROP TABLE IF EXISTS `bai_chia_se`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `bai_chia_se` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `loai` enum('tai_lieu','do_an','bai_viet') COLLATE utf8mb4_unicode_ci NOT NULL,
-  `tieu_de` varchar(200) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `mo_ta` text COLLATE utf8mb4_unicode_ci,
-  `file_upload` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `link_host` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `link_source` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `cong_nghe` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `loai` enum('tai_lieu','do_an','bai_viet') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `tieu_de` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `mo_ta` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `file_upload` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `link_host` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `link_source` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `cong_nghe` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `id_mon_hoc` int DEFAULT NULL,
   `id_danh_muc` int DEFAULT NULL,
   `id_nguoi_dung` int NOT NULL,
   `ngay_tao` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `ngay_cap_nhat` timestamp NULL DEFAULT NULL,
-  `tom_tat` text COLLATE utf8mb4_unicode_ci,
+  `tom_tat` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   PRIMARY KEY (`id`),
   KEY `id_mon_hoc` (`id_mon_hoc`) /*!80000 INVISIBLE */,
   KEY `id_danh_muc` (`id_danh_muc`),
@@ -67,7 +67,7 @@ CREATE TABLE `binh_luan` (
   `id` int NOT NULL AUTO_INCREMENT,
   `id_bai_chia_se` int DEFAULT NULL,
   `id_nguoi_dung` int DEFAULT NULL,
-  `noi_dung` text COLLATE utf8mb4_unicode_ci,
+  `noi_dung` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `ngay_tao` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `id_bai_chia_se` (`id_bai_chia_se`),
@@ -95,8 +95,8 @@ DROP TABLE IF EXISTS `danh_muc`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `danh_muc` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `ten_danh_muc` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `mo_ta` text COLLATE utf8mb4_unicode_ci,
+  `ten_danh_muc` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `mo_ta` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -119,8 +119,8 @@ DROP TABLE IF EXISTS `mon_hoc`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `mon_hoc` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `ten_mon` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `mo_ta` text COLLATE utf8mb4_unicode_ci,
+  `ten_mon` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `mo_ta` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -143,14 +143,14 @@ DROP TABLE IF EXISTS `nguoi_dung`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `nguoi_dung` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `ten_dang_nhap` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `email` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `mat_khau` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `ho_ten` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `vai_tro` enum('quan_tri_vien','nguoi_dung','khach') COLLATE utf8mb4_unicode_ci DEFAULT 'khach',
+  `ten_dang_nhap` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `email` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `mat_khau` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `ho_ten` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `vai_tro` enum('quan_tri_vien','nguoi_dung','khach') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT 'khach',
   `ngay_tao` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `ngay_cap_nhat` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `trang_thai` enum('hoạt_dong','khoa') COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `trang_thai` enum('hoạt_dong','khoa') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `ten_dang_nhap` (`ten_dang_nhap`),
   UNIQUE KEY `email` (`email`)
@@ -177,7 +177,7 @@ CREATE TABLE `thu_vien_ca_nhan` (
   `id` int NOT NULL AUTO_INCREMENT,
   `id_nguoi_dung` int DEFAULT NULL,
   `id_bai_chia_se` int DEFAULT NULL,
-  `loai` enum('tai_lieu','do_an') COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `loai` enum('tai_lieu','do_an') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `ngay_tao` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `id_nguoi_dung` (`id_nguoi_dung`),
@@ -207,7 +207,7 @@ CREATE TABLE `tuong_tac` (
   `id` int NOT NULL AUTO_INCREMENT,
   `id_bai_chia_se` int DEFAULT NULL,
   `id_nguoi_dung` int DEFAULT NULL,
-  `loai` enum('like','dislike','share') COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `loai` enum('like','dislike','share') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `ngay_tao` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `id_bai_chia_se` (`id_bai_chia_se`,`id_nguoi_dung`,`loai`),
@@ -235,4 +235,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-08-28 14:54:39
+-- Dump completed on 2025-09-05 11:28:00
