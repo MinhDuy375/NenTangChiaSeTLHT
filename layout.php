@@ -125,6 +125,7 @@
                 <a href="index.php?page=home">Trang chủ</a>
                 <a href="index.php?page=danhSachMon">Môn học</a>
                 <a href="index.php?page=duAn">Dự án</a>
+                <a href="index.php?page=thuVienNguon">Thư viện nguồn</a>
                 <a href="index.php?page=lienHe">Liên hệ</a>
                 <a href="index.php?page=dangTaiTaiLieu">Upload Tài liệu</a>
             </nav>

@@ -24,7 +24,7 @@ DROP TABLE IF EXISTS `bai_chia_se`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `bai_chia_se` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `loai` enum('tai_lieu','do_an','bai_viet') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `loai` enum('tai_lieu','du_an') COLLATE utf8mb4_unicode_ci NOT NULL,
   `tieu_de` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `mo_ta` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `file_upload` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
@@ -44,7 +44,7 @@ CREATE TABLE `bai_chia_se` (
   CONSTRAINT `bai_chia_se_ibfk_1` FOREIGN KEY (`id_mon_hoc`) REFERENCES `mon_hoc` (`id`),
   CONSTRAINT `bai_chia_se_ibfk_2` FOREIGN KEY (`id_danh_muc`) REFERENCES `danh_muc` (`id`),
   CONSTRAINT `bai_chia_se_ibfk_3` FOREIGN KEY (`id_nguoi_dung`) REFERENCES `nguoi_dung` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -53,6 +53,7 @@ CREATE TABLE `bai_chia_se` (
 
 LOCK TABLES `bai_chia_se` WRITE;
 /*!40000 ALTER TABLE `bai_chia_se` DISABLE KEYS */;
+INSERT INTO `bai_chia_se` VALUES (1,'tai_lieu','Vở ghi Phân tích và thiết kế các hệ thống thông tin','Vở ghi Phân tích và thiết kế các hệ thống thông tin','uploads/tai_lieu/Vở ghi Phân tích và thiết kế các hệ thống thông tin_1757049216_05852f.docx',NULL,NULL,NULL,1,NULL,1,'2025-09-05 05:13:36',NULL,NULL),(2,'tai_lieu','Vở ghi Phân tích và thiết kế các hệ thống thông tin','Vở ghi Phân tích và thiết kế các hệ thống thông tin','uploads/tai_lieu/Vở ghi Phân tích và thiết kế các hệ thống thông tin_1757049455_341602.docx',NULL,NULL,NULL,1,NULL,1,'2025-09-05 05:17:35',NULL,NULL),(7,'du_an','Hệ thống Quản lý Sinh viên','Mã nguồn PHP + MySQL cho quản lý sinh viên. Hỗ trợ thêm/sửa/xóa sinh viên.',NULL,NULL,'https://github.com/example/qlsv','PHP, MySQL',NULL,5,1,'2025-09-08 09:31:16',NULL,NULL),(8,'du_an','Website Bán Hàng Mini','Frontend cơ bản với HTML, CSS, JS. Demo giao diện bán hàng.',NULL,'https://shop-demo.com','https://github.com/example/shop-fe','HTML, CSS, JS',NULL,4,1,'2025-09-08 09:31:16',NULL,NULL),(9,'du_an','Quản lý Thư viện Sách','Ứng dụng Java Swing quản lý sách, cho phép mượn/trả sách.',NULL,NULL,'https://github.com/example/java-lib','Java, Swing',NULL,7,1,'2025-09-08 09:31:16',NULL,NULL),(10,'du_an','Ứng dụng Chat Realtime','Chat realtime sử dụng NodeJS + Socket.io, có giao diện cơ bản.',NULL,'https://chat-demo.com','https://github.com/example/chat-realtime','NodeJS, Socket.io',NULL,5,1,'2025-09-08 09:31:16',NULL,NULL);
 /*!40000 ALTER TABLE `bai_chia_se` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -98,7 +99,7 @@ CREATE TABLE `danh_muc` (
   `ten_danh_muc` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `mo_ta` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -107,6 +108,7 @@ CREATE TABLE `danh_muc` (
 
 LOCK TABLES `danh_muc` WRITE;
 /*!40000 ALTER TABLE `danh_muc` DISABLE KEYS */;
+INSERT INTO `danh_muc` VALUES (1,'Giáo trình','Tài liệu giảng dạy chính thức'),(2,'Bài tập','Các bài tập và lời giải'),(3,'Đề thi','Đề thi các kỳ trước'),(4,'Frontend','Mã nguồn giao diện người dùng'),(5,'Backend','Mã nguồn xử lý logic phía server'),(6,'Database','Mã nguồn về cơ sở dữ liệu'),(7,'Java','Mã nguồn Java'),(8,'PHP','Mã nguồn PHP'),(9,'Python','Mã nguồn Python');
 /*!40000 ALTER TABLE `danh_muc` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -122,7 +124,7 @@ CREATE TABLE `mon_hoc` (
   `ten_mon` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `mo_ta` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -131,6 +133,7 @@ CREATE TABLE `mon_hoc` (
 
 LOCK TABLES `mon_hoc` WRITE;
 /*!40000 ALTER TABLE `mon_hoc` DISABLE KEYS */;
+INSERT INTO `mon_hoc` VALUES (1,'Cơ sở dữ liệu','Môn học về cơ sở dữ liệu quan hệ'),(2,'Lập trình Web','Môn học lập trình web PHP'),(3,'Mạng máy tính','Môn học về nguyên lý mạng');
 /*!40000 ALTER TABLE `mon_hoc` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -154,7 +157,7 @@ CREATE TABLE `nguoi_dung` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `ten_dang_nhap` (`ten_dang_nhap`),
   UNIQUE KEY `email` (`email`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -163,6 +166,7 @@ CREATE TABLE `nguoi_dung` (
 
 LOCK TABLES `nguoi_dung` WRITE;
 /*!40000 ALTER TABLE `nguoi_dung` DISABLE KEYS */;
+INSERT INTO `nguoi_dung` VALUES (1,'admin','admin@example.com','21232f297a57a5a743894a0e4a801fc3','Quản trị viên','quan_tri_vien','2025-09-05 05:12:10','2025-09-05 05:12:10','hoạt_dong');
 /*!40000 ALTER TABLE `nguoi_dung` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -235,4 +239,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-09-05 11:28:00
+-- Dump completed on 2025-09-08 16:31:24
