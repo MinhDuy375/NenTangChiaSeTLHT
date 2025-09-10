@@ -1,6 +1,6 @@
 <?php
 // Kết nối database
-include 'ketNoiDB.php';
+require './config/ketNoiDB.php';
 
 $message = '';
 

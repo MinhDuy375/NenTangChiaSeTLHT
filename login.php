@@ -1,6 +1,6 @@
 <?php
 session_start();
-require 'ketNoiDB.php'; // PDO: $pdo
+require './config/ketNoiDB.php'; // PDO: $pdo
 
 $message = '';
 

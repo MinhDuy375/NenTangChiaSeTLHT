@@ -1,6 +1,6 @@
 <?php
 session_start();
-require 'ketNoiDB.php';
+require './config/ketNoiDB.php';
 
 if (!isset($_SESSION['pending_user'])) {
     die("Không có dữ liệu đăng ký.");

@@ -1,6 +1,6 @@
 <?php
 session_start();
-require 'ketNoiDB.php';
+require './config/ketNoiDB.php';
 
 if (isset($_SESSION['user_id'])) {
     $user_id = $_SESSION['user_id'];
