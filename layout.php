@@ -211,7 +211,7 @@
 </head>
 <body>
     <header class="main-header">
-        <a href="index.php?page=home" class="logo">📚 Sharedy</a>
+        <a href="index.php?page=home" class="logo">Sharedy</a>
         
         <div class="header-search-container">
             <input type="text" 
