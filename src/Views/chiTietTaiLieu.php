@@ -444,15 +444,15 @@ function tinh_kich_thuoc_file($duong_dan_file) {
     <div class="container">
         <div class="header">
             <div class="breadcrumb">
-                <a href="danhSachMon.php">🏠 Trang chủ</a> / 
-                <a href="danhSachMon.php">Danh sách môn học</a> / 
-                <a href="taiLieuMon.php?id_mon_hoc=<?php echo $tai_lieu['id_mon_hoc']; ?>">
+                
+                <a href="index.php?page=monhoc">Danh sách môn học</a> / 
+                <a href="index.php?page=tailieumon&id_mon_hoc=<?php echo $tai_lieu['id_mon_hoc']; ?>">
                     <?php echo lam_sach_chuoi($tai_lieu['ten_mon']); ?>
                 </a> / 
                 Chi tiết tài liệu
             </div>
             <div class="header-title">
-                <a href="taiLieuMon.php?id_mon_hoc=<?php echo $tai_lieu['id_mon_hoc']; ?>" 
+                <a href="index.php?page=tailieumon&id_mon_hoc=<?php echo $tai_lieu['id_mon_hoc']; ?>" 
                    class="back-btn">
                     ← Quay lại
                 </a>
@@ -571,7 +571,7 @@ function tinh_kich_thuoc_file($duong_dan_file) {
                         <h3>🔗 Tài liệu liên quan</h3>
                         <?php foreach ($tai_lieu_lien_quan as $lien_quan): ?>
                         <div class="related-item" 
-                             onclick="window.location.href='chi_tiet_tai_lieu.php?id=<?php echo $lien_quan['id']; ?>'">
+                             onclick="window.location.href='index.php?page=chitiettailieu&id=<?php echo $lien_quan['id']; ?>'">
                             <div class="related-title">
                                 <?php echo lay_icon_file($lien_quan['file_upload']); ?>
                                 <?php echo lam_sach_chuoi($lien_quan['tieu_de']); ?>

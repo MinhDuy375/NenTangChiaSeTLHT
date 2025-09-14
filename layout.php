@@ -37,7 +37,7 @@
             font-weight: bold;
             text-decoration: none;
             color: white;
-            padding: 10px 0;
+            padding: 10px 10px;
         }
         
         .logo:hover {
@@ -46,7 +46,7 @@
 
         .header-search-container {
             flex: 1;
-            max-width: 400px;
+            max-width: 300px;
             margin: 0 30px;
         }
         
@@ -211,7 +211,7 @@
 </head>
 <body>
     <header class="main-header">
-        <a href="index.php?page=home" class="logo">📚 Sharedy</a>
+        <a href="index.php?page=home" class="logo">Sharedy</a>
         
         <div class="header-search-container">
             <input type="text" 
@@ -221,19 +221,17 @@
                    onkeyup="tim_kiem_mon_hoc()">
         </div>
         
-        <nav class="nav-menu">
-            <a href="index.php?page=home" <?= ($page ?? 'home') == 'home' ? 'class="active"' : '' ?>>
+<nav class="nav-menu">
+            <a href="index.php?page=home" <?= ($page ?? '') == 'contact' ? 'class="active"' : '' ?>>
                 Trang chủ
             </a>
             <a href="index.php?page=monhoc" <?= ($page ?? '') == 'monhoc' ? 'class="active"' : '' ?>>
                 Môn học
             </a>
-            <a href="index.php?page=upload" <?= ($page ?? '') == 'upload' ? 'class="active"' : '' ?>>
-                Đăng tải
+            <a href="index.php?page=source" <?= ($page ?? '') == 'upload' ? 'class="active"' : '' ?>>
+                Thư viện nguồn
             </a>
-            <a href="index.php?page=contact" <?= ($page ?? '') == 'contact' ? 'class="active"' : '' ?>>
-                Liên hệ
-            </a>
+            
         </nav>
         
         <div class="user-section">
@@ -243,6 +241,8 @@
                 <button type="submit" class="logout-btn">Đăng xuất</button>
             </form>
         </div>
+        
+        
     </header>
     
     <main>

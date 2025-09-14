@@ -356,7 +356,24 @@ try {
     .form-help li {
         margin-bottom: 5px;
     }
-    
+            .back-btn {
+            background: #6c757d;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+            transition: all 0.3s;
+            margin-bottom: 20px;
+        }
+        
+        .back-btn:hover {
+            background: #5a6268;
+            transform: translateX(-3px);
+        }
     @media (max-width: 768px) {
         .hero-section {
             padding: 40px 15px;
@@ -391,7 +408,11 @@ try {
     </div>
     
     <div class="form-section">
+
         <div class="form-card">
+            <a href="index.php?page=monhoc" class="back-btn">
+                ← Quay lại danh sách môn học
+            </a>
             <?php if (!empty($thong_bao)): ?>
                 <div class="thong-bao <?php echo $loai_thong_bao; ?>">
                     <?php echo $thong_bao; ?>
