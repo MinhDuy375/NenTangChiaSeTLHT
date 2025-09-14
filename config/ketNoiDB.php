@@ -2,11 +2,7 @@
 
 $servername = "localhost";
 $username = "root";
-<<<<<<< HEAD
 $password = "duy3725";
-=======
-$password = "Nguyenkien7901@";
->>>>>>> 7a04655492c9d396cd54545edf6ff83dedacd21a
 $dbname = "chiasetailieudb";
 //tạo các bến chứa thông tin của conections 
 

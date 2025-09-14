@@ -34,6 +34,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 ?>
 
 <div class="container">
+    <a href="index.php?page=source" class="back-btn">
+                ← Quay lại danh sách môn học
+            </a>
     <h2>📝 Đăng tải mã nguồn</h2>
     <form method="post">
         <label>Tiêu đề:</label><br>

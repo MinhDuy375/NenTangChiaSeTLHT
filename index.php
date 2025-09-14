@@ -22,12 +22,27 @@ switch ($page) {
     case 'monhoc':
         include "src/Views/danhSachMon.php";
         break;
+    case 'tailieumon':
+        include "src/Views/taiLieuMon.php";
+        break;
+    case 'chitiettailieu':
+        include "src/Views/chiTietTaiLieu.php";
+        break;     
     case 'contact':
         include "src/Views/lienHe.php";
         break;
     case 'upload':
         include "src/Views/dangTaiTaiLieu.php";
         break;
+    case 'source':
+        include "src/Views/ThuVienNguon.php";
+        break;
+    case 'source_upload':
+        include "src/Views/dangTaiNguon.php";
+        break;    
+    case 'source_detail':
+        include "src/Views/chiTietNguon.php";
+        break;  
     default:
         echo "<div style='text-align: center; padding: 50px;'>";
         echo "<h2>404 - Không tìm thấy trang</h2>";

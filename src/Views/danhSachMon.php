@@ -465,13 +465,13 @@ if (!function_exists('lam_sach_chuoi')) {
                             
                             <div class="mon-hoc-actions">
                                 <?php if ($mon_hoc['so_luong_tai_lieu'] > 0): ?>
-                                    <a href="src/Views/taiLieuMon.php?id_mon_hoc=<?php echo $mon_hoc['id']; ?>" 
+                                    <a href="index.php?page=tailieumon&id_mon_hoc=<?php echo $mon_hoc['id']; ?>" 
                                        class="btn btn-primary">
                                         <span class="icon">👁️</span> Xem Tài Liệu
                                     </a>
                                 <?php else: ?>
                                     <span class="btn btn-outline">
-                                        <span class="icon">📭</span> Chưa có tài liệu
+                                        <span class="icon">🔭</span> Chưa có tài liệu
                                     </span>
                                 <?php endif; ?>
                             </div>
