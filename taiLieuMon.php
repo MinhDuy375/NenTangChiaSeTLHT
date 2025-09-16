@@ -1,7 +1,7 @@
 <?php
 // tai_lieu_theo_mon.php - Trang hiển thị tài liệu theo môn học
 // Đặt file này trong thư mục src/Views/
-include __DIR__ . '/../../config/ketNoiDB.php';
+include __DIR__ . '/ketNoiDB.php';
 
 
 // Lấy ID môn học từ URL
@@ -90,7 +90,7 @@ function tinh_kich_thuoc_file($duong_dan_file) {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            
+            padding: 20px;
         }
         
         .container {
@@ -162,7 +162,27 @@ function tinh_kich_thuoc_file($duong_dan_file) {
             opacity: 0.9;
         }
         
-
+        .nav-menu {
+            background: #f8f9fa;
+            padding: 15px;
+            text-align: center;
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        .nav-menu a {
+            text-decoration: none;
+            color: #495057;
+            margin: 0 15px;
+            padding: 8px 16px;
+            border-radius: 5px;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+        
+        .nav-menu a:hover {
+            background: #007bff;
+            color: white;
+        }
         
         .content {
             padding: 30px;
@@ -404,8 +424,8 @@ function tinh_kich_thuoc_file($duong_dan_file) {
         <div class="header">
             <div class="header-content">
                 <div class="breadcrumb">
-                    
-                    <a href="index.php?page=monhoc">Danh sách môn học</a> / 
+                    <a href="danhSachMon.php">🏠 Trang chủ</a> / 
+                    <a href="danhSachMon.php">Danh sách môn học</a> / 
                     <?php echo lam_sach_chuoi($thong_tin_mon_hoc['ten_mon']); ?>
                 </div>
                 <h1>📚 <?php echo lam_sach_chuoi($thong_tin_mon_hoc['ten_mon']); ?></h1>
@@ -427,7 +447,7 @@ function tinh_kich_thuoc_file($duong_dan_file) {
         </div>
         
         <div class="content">
-            <a href="index.php?page=monhoc" class="back-btn">
+            <a href="danhSachMon.php" class="back-btn">
                 ← Quay lại danh sách môn học
             </a>
             
@@ -441,7 +461,7 @@ function tinh_kich_thuoc_file($duong_dan_file) {
                 <div class="empty-state">
                     <h3>📭 Chưa có tài liệu nào</h3>
                     <p>Môn học này chưa có tài liệu nào được upload.</p>
-                    <a href="index.php?page=upload" class="btn btn-primary">
+                    <a href="dangTaiTaiLieu.php" class="btn btn-primary">
                         ➕ Upload Tài Liệu Đầu Tiên
                     </a>
                 </div>
@@ -496,7 +516,7 @@ function tinh_kich_thuoc_file($duong_dan_file) {
                                 </div>
                                 
                                 <div class="tai-lieu-actions">
-                                    <a href="index.php?page=chitiettailieu&id=<?php echo $tai_lieu['id']; ?>" 
+                                    <a href="chiTietTaiLieu.php?id=<?php echo $tai_lieu['id']; ?>" 
                                        class="btn btn-primary">
                                         👁️ Xem Chi Tiết
                                     </a>

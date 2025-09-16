@@ -458,7 +458,7 @@ try {
         <div class="hero-content">
             <h1 class="hero-title"> Chào mừng đến với Sharedy</h1>
             <p class="hero-subtitle">
-                Nền tảng chia sẻ tài liệu học tập hàng đầu dành cho sinh viên Công nghệ thông tin. 
+                Nền tảng chia sẻ tài liệu học tập  dành cho sinh viên Công nghệ <br>
                 Khám phá, học hỏi và chia sẻ kiến thức cùng cộng đồng.
             </p>
             <div class="hero-actions">
@@ -470,6 +470,7 @@ try {
                 </a>
             </div>
         </div>
+
     </div>
     
     <!-- Stats Section -->
