@@ -24,7 +24,7 @@ DROP TABLE IF EXISTS `bai_chia_se`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `bai_chia_se` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `loai` enum('tai_lieu','du_an') COLLATE utf8mb4_unicode_ci NOT NULL,
+  `loai` enum('tai_lieu','du_an') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `tieu_de` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `mo_ta` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `file_upload` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
@@ -38,9 +38,9 @@ CREATE TABLE `bai_chia_se` (
   `ngay_cap_nhat` timestamp NULL DEFAULT NULL,
   `tom_tat` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   PRIMARY KEY (`id`),
-  KEY `id_mon_hoc` (`id_mon_hoc`) /*!80000 INVISIBLE */,
+  KEY `id_mon_hoc` (`id_mon_hoc`),
   KEY `id_danh_muc` (`id_danh_muc`),
-  KEY `bai_chia_se_ibfk_3` (`id_nguoi_dung`),
+  KEY `id_nguoi_dung` (`id_nguoi_dung`),
   CONSTRAINT `bai_chia_se_ibfk_1` FOREIGN KEY (`id_mon_hoc`) REFERENCES `mon_hoc` (`id`),
   CONSTRAINT `bai_chia_se_ibfk_2` FOREIGN KEY (`id_danh_muc`) REFERENCES `danh_muc` (`id`),
   CONSTRAINT `bai_chia_se_ibfk_3` FOREIGN KEY (`id_nguoi_dung`) REFERENCES `nguoi_dung` (`id`)
@@ -53,7 +53,7 @@ CREATE TABLE `bai_chia_se` (
 
 LOCK TABLES `bai_chia_se` WRITE;
 /*!40000 ALTER TABLE `bai_chia_se` DISABLE KEYS */;
-INSERT INTO `bai_chia_se` VALUES (1,'tai_lieu','Vở ghi Phân tích và thiết kế các hệ thống thông tin','Vở ghi Phân tích và thiết kế các hệ thống thông tin','uploads/tai_lieu/Vở ghi Phân tích và thiết kế các hệ thống thông tin_1757049216_05852f.docx',NULL,NULL,NULL,1,NULL,1,'2025-09-05 05:13:36',NULL,NULL),(2,'tai_lieu','Vở ghi Phân tích và thiết kế các hệ thống thông tin','Vở ghi Phân tích và thiết kế các hệ thống thông tin','uploads/tai_lieu/Vở ghi Phân tích và thiết kế các hệ thống thông tin_1757049455_341602.docx',NULL,NULL,NULL,1,NULL,1,'2025-09-05 05:17:35',NULL,NULL),(7,'du_an','Hệ thống Quản lý Sinh viên','Mã nguồn PHP + MySQL cho quản lý sinh viên. Hỗ trợ thêm/sửa/xóa sinh viên.',NULL,NULL,'https://github.com/example/qlsv','PHP, MySQL',NULL,5,1,'2025-09-08 09:31:16',NULL,NULL),(8,'du_an','Website Bán Hàng Mini','Frontend cơ bản với HTML, CSS, JS. Demo giao diện bán hàng.',NULL,'https://shop-demo.com','https://github.com/example/shop-fe','HTML, CSS, JS',NULL,4,1,'2025-09-08 09:31:16',NULL,NULL),(9,'du_an','Quản lý Thư viện Sách','Ứng dụng Java Swing quản lý sách, cho phép mượn/trả sách.',NULL,NULL,'https://github.com/example/java-lib','Java, Swing',NULL,7,1,'2025-09-08 09:31:16',NULL,NULL),(10,'du_an','Ứng dụng Chat Realtime','Chat realtime sử dụng NodeJS + Socket.io, có giao diện cơ bản.',NULL,'https://chat-demo.com','https://github.com/example/chat-realtime','NodeJS, Socket.io',NULL,5,1,'2025-09-08 09:31:16',NULL,NULL);
+INSERT INTO `bai_chia_se` VALUES (1,'tai_lieu','Vở ghi Phân tích và thiết kế các hệ thống thông tin','Vở ghi Phân tích và thiết kế các hệ thống thông tin','uploads/tai_lieu/Vở ghi Phân tích và thiết kế các hệ thống thông tin_1757049216_05852f.docx',NULL,NULL,NULL,1,NULL,1,'2025-09-04 22:13:36',NULL,NULL),(2,'tai_lieu','Vở ghi Phân tích và thiết kế các hệ thống thông tin','Vở ghi Phân tích và thiết kế các hệ thống thông tin','uploads/tai_lieu/Vở ghi Phân tích và thiết kế các hệ thống thông tin_1757049455_341602.docx',NULL,NULL,NULL,1,NULL,1,'2025-09-04 22:17:35',NULL,NULL),(7,'du_an','Hệ thống Quản lý Sinh viên','Mã nguồn PHP + MySQL cho quản lý sinh viên. Hỗ trợ thêm/sửa/xóa sinh viên.',NULL,NULL,'https://github.com/example/qlsv','PHP, MySQL',NULL,5,1,'2025-09-08 02:31:16',NULL,NULL),(8,'du_an','Website Bán Hàng Mini','Frontend cơ bản với HTML, CSS, JS. Demo giao diện bán hàng.',NULL,'https://shop-demo.com','https://github.com/example/shop-fe','HTML, CSS, JS',NULL,4,1,'2025-09-08 02:31:16',NULL,NULL),(9,'du_an','Quản lý Thư viện Sách','Ứng dụng Java Swing quản lý sách, cho phép mượn/trả sách.',NULL,NULL,'https://github.com/example/java-lib','Java, Swing',NULL,7,1,'2025-09-08 02:31:16',NULL,NULL),(10,'du_an','Ứng dụng Chat Realtime','Chat realtime sử dụng NodeJS + Socket.io, có giao diện cơ bản.',NULL,'https://chat-demo.com','https://github.com/example/chat-realtime','NodeJS, Socket.io',NULL,5,1,'2025-09-08 02:31:16',NULL,NULL);
 /*!40000 ALTER TABLE `bai_chia_se` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -166,7 +166,7 @@ CREATE TABLE `nguoi_dung` (
 
 LOCK TABLES `nguoi_dung` WRITE;
 /*!40000 ALTER TABLE `nguoi_dung` DISABLE KEYS */;
-INSERT INTO `nguoi_dung` VALUES (1,'admin','admin@example.com','21232f297a57a5a743894a0e4a801fc3','Quản trị viên','quan_tri_vien','2025-09-05 05:12:10','2025-09-05 05:12:10','hoạt_dong');
+INSERT INTO `nguoi_dung` VALUES (1,'admin','admin@example.com','21232f297a57a5a743894a0e4a801fc3','Quản trị viên','quan_tri_vien','2025-09-04 22:12:10','2025-09-04 22:12:10','hoạt_dong');
 /*!40000 ALTER TABLE `nguoi_dung` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -214,7 +214,7 @@ CREATE TABLE `tuong_tac` (
   `loai` enum('like','dislike','share') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `ngay_tao` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `id_bai_chia_se` (`id_bai_chia_se`,`id_nguoi_dung`,`loai`),
+  UNIQUE KEY `unique_interaction` (`id_bai_chia_se`,`id_nguoi_dung`,`loai`),
   KEY `id_nguoi_dung` (`id_nguoi_dung`),
   CONSTRAINT `tuong_tac_ibfk_1` FOREIGN KEY (`id_bai_chia_se`) REFERENCES `bai_chia_se` (`id`),
   CONSTRAINT `tuong_tac_ibfk_2` FOREIGN KEY (`id_nguoi_dung`) REFERENCES `nguoi_dung` (`id`)
@@ -239,4 +239,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-09-08 16:31:24
+-- Dump completed on 2025-09-17  7:20:38
