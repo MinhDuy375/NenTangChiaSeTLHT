@@ -1,6 +1,8 @@
 <?php
-session_start();
-require './config/ketNoiDB.php';
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+require 'ketNoiDB.php';
 require 'vendor/autoload.php';
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
@@ -56,7 +58,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $mail->Body    = "hello $name,<br>your OTP is: <b>$otp</b>";
 
                 $mail->send();
-                header("Location: verify.php"); // chuyển sang trang nhập OTP
+                header("Location: index.php?page=verify"); // chuyển sang trang nhập OTP
                 exit;
             } catch (Exception $e) {
                 $message = "Không gửi được email: {$mail->ErrorInfo}";
@@ -67,47 +69,44 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 ?>
 
 
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Đăng ký</title>
-    <meta charset="UTF-8">
-</head>
-<body>
-    <h2>Đăng ký tài khoản</h2>
-    <?php if ($message): ?>
-        <p style="color:red;"><?php echo htmlspecialchars($message); ?></p>
-    <?php endif; ?>
+<div class="container">
+    <div class="form-box">
+        <h2>Đăng ký tài khoản</h2>
 
-    <form method="post" action="">
-        <label>Tên đăng nhập:</label><br>
-        <input type="text" name="username" required><br><br>
+        <?php if (!empty($message)): ?>
+            <p class="message"><?php echo htmlspecialchars($message); ?></p>
+        <?php endif; ?>
 
-        <label>Họ và Tên:</label><br>
-        <input type="text" name="name" required><br><br>
+        <form method="post" action="">
+            <label>Tên đăng nhập:</label>
+            <input type="text" name="username" required>
 
-        <label>Email:</label><br>
-        <input type="email" name="email" required><br><br>
+            <label>Họ và Tên:</label>
+            <input type="text" name="name" required>
 
-        <label>Vai trò:</label><br>
-        <select name="role" required>
-            <option value="nguoi_dung">Người dùng</option>
-            <option value="quan_tri_vien">Quản trị viên</option>
-            <option value="khach">Khách</option>
-        </select><br><br>
+            <label>Email:</label>
+            <input type="email" name="email" required>
 
-        <label>Mật khẩu:</label><br>
-        <input type="password" name="password" required><br><br>
+            <label>Vai trò:</label>
+            <select name="role" required>
+                <option value="nguoi_dung">Người dùng</option>
+                <option value="khach">Khách</option>
+            </select>
 
-        <label>Nhập lại mật khẩu:</label><br>
-        <input type="password" name="confirm_password" required><br><br>
+            <div>
+                <label>Mật khẩu:</label>
+                <input type="password" name="password" required>
+            </div>
 
-        <button type="submit">Đăng ký</button>
-    </form>
+            <label>Nhập lại mật khẩu:</label>
+            <input type="password" name="confirm_password" required>
 
-    <br>
-    <form action="login.php" method="get" style="display:inline;">
-        <button type="submit">Đăng nhập</button>
-    </form>
-</body>
-</html>
+            <button style="margin-bottom: 20px;" type="submit">Đăng ký</button>
+        </form>
+
+        <form action="index.php" method="get" style="margin-top:10px;">
+            <input type="hidden" name="page" value="login">
+            <button type="submit" class="login-btn">Đăng nhập</button>
+        </form>
+    </div>
+</div>

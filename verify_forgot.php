@@ -2,34 +2,33 @@
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
-require 'ketNoiDB.php';
-
-if (!isset($_SESSION['pending_user'])) {
-    die("Không có dữ liệu đăng ký.");
-}
 
 $message = '';
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $otp_input = $_POST['otp'];
+    $otp = trim($_POST['otp']);
 
-    if ($otp_input == $_SESSION['pending_user']['otp']) {
-        $data = $_SESSION['pending_user'];
-
-        $stmt = $pdo->prepare(
-            "INSERT INTO nguoi_dung (ten_dang_nhap, ho_ten, email, vai_tro, mat_khau, ngay_tao, ngay_cap_nhat, trang_thai)
-             VALUES (?, ?, ?, ?, ?, NOW(), NOW(), ?)"
-        );
-        $status = 'hoạt_dong'; // ✅ khi xác minh thành công thì trạng thái = hoatdong
-        $stmt->execute([$data['username'], $data['name'], $data['email'], $data['role'], $data['password'], $status]);
-
-        unset($_SESSION['pending_user']);
-        $message = "🎉 Đăng ký thành công! Bạn có thể đăng nhập.";
+    // Kiểm tra OTP trong session
+    if (!isset($_SESSION['reset_otp']) || !isset($_SESSION['otp_expire'])) {
+        $message = "OTP không tồn tại hoặc đã hết hạn.";
+    } elseif (time() > $_SESSION['otp_expire']) {
+        $message = "OTP đã hết hạn.";
+        unset($_SESSION['reset_otp'], $_SESSION['otp_expire']);
+    } elseif ($otp != $_SESSION['reset_otp']) {
+        $message = "OTP không đúng.";
     } else {
-        $message = "❌ Mã OTP không đúng!";
+        // OTP đúng -> đánh dấu đã xác thực
+        $_SESSION['otp_verified'] = true;
+
+        // Xóa OTP để không dùng lại
+        unset($_SESSION['reset_otp'], $_SESSION['otp_expire']);
+
+        // Chuyển sang trang đổi mật khẩu
+        header("Location: index.php?page=reset_password");
+        exit;
     }
 }
 ?>
-
 
 <div class="container">
     <div class="form-box">
@@ -37,7 +36,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <p>Vui lòng nhập mã xác nhận được gửi về email đăng ký</p>
 
         <?php if (!empty($message)): ?>
-            <p class="message" style="color:red;"><?= htmlspecialchars($message) ?></p>
+            <p class="message" style="color:red;"><?php echo htmlspecialchars($message); ?></p>
         <?php endif; ?>
 
         <form method="post" onsubmit="combineOTP(); return true;">
