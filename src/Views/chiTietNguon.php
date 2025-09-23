@@ -59,7 +59,7 @@ ob_start();
         }
         
         /* Header styles - tương thích với layout.php */
-        .main-header { 
+        /* .main-header { 
             position: fixed;   
             top: 0;            
             left: 0;
@@ -73,9 +73,9 @@ ob_start();
             justify-content: space-between;
             height: 70px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
+        } */
         
-        .logo {
+        /* .logo {
             font-size: 24px;
             font-weight: bold;
             text-decoration: none;
@@ -186,10 +186,10 @@ ob_start();
         .logout-btn:hover {
             background: #ff4d4f;
             transform: translateY(-1px);
-        }
+        } */
         
         main { 
-            padding-top: 70px; 
+           
             min-height: calc(100vh - 130px);
             background-color: #f8f9fa;
         }
@@ -619,22 +619,7 @@ ob_start();
         }
 
         @media (max-width: 768px) {
-            .main-header {
-                flex-direction: column;
-                height: auto;
-                padding: 10px;
-            }
             
-            .header-search-container {
-                margin: 10px 0;
-                max-width: 100%;
-            }
-            
-            .nav-menu {
-                flex-wrap: wrap;
-                gap: 10px;
-                justify-content: center;
-            }
             
             .user-section {
                 margin-left: 0;
@@ -669,14 +654,9 @@ ob_start();
         }
         
         @media (max-width: 480px) {
-            .nav-menu a {
-                padding: 6px 12px;
-                font-size: 14px;
-            }
+           
             
-            .logo {
-                font-size: 20px;
-            }
+         
             
             .post-header, .post-content, .post-stats, .post-actions, .comments-section {
                 padding-left: 15px;
@@ -686,39 +666,7 @@ ob_start();
     </style>
 </head>
 <body>
-    <header class="main-header">
-        <a href="index.php?page=home" class="logo">Sharedy</a>
-        
-        <div class="header-search-container">
-            <input type="text" 
-                   class="header-search-box" 
-                   id="search-input" 
-                   placeholder="Tìm kiếm nhanh..."
-                   onkeyup="tim_kiem_mon_hoc()">
-        </div>
-        
-        <nav class="nav-menu">
-            <a href="index.php?page=home">Trang chủ</a>
-            <a href="index.php?page=monhoc">Môn học</a>
-            <a href="index.php?page=source" class="active">Thư viện nguồn</a>
-        </nav>
-        
-        <?php if ($is_logged_in): ?>
-        <div class="user-section">
-            <span class="user-name"><?= htmlspecialchars($username) ?></span>
-            <div class="user-avatar" title="<?= htmlspecialchars($username) ?>">
-                <?= strtoupper(substr($username, 0, 1)) ?>
-            </div>
-            <form action="logout.php" method="post" style="margin:0;">
-                <button type="submit" class="logout-btn">Đăng xuất</button>
-            </form>
-        </div>
-        <?php else: ?>
-        <div class="user-section">
-            <a href="index.php?page=login" style="padding: 8px 16px; font-size: 14px; background: rgba(255,255,255,0.2); color: white; text-decoration: none; border-radius: 20px;">Đăng nhập</a>
-        </div>
-        <?php endif; ?>
-    </header>
+ 
     
     <main>
         <div class="detail-container">
@@ -1069,24 +1017,8 @@ ob_start();
 $content = ob_get_clean();
 
 // Tìm đường dẫn đúng đến layout.php
-$possible_paths = [
-    __DIR__ . '/layout.php',
-    __DIR__ . '/../layout.php', 
-    __DIR__ . '/../../layout.php',
-    'layout.php'
-];
 
-$layout_found = false;
-foreach ($possible_paths as $path) {
-    if (file_exists($path)) {
-        include $path;
-        $layout_found = true;
-        break;
-    }
-}
+   include __DIR__ . '/../../layout.php';
 
-// Nếu không tìm thấy layout.php, hiển thị trực tiếp
-if (!$layout_found) {
-    echo $content;
-}
+
 ?>
