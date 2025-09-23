@@ -1,6 +1,8 @@
 <?php
-session_start();
-require './config/ketNoiDB.php';
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+require 'ketNoiDB.php';
 
 if (!isset($_SESSION['pending_user'])) {
     die("Không có dữ liệu đăng ký.");
@@ -29,26 +31,49 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 ?>
 
 
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <title>Xác minh OTP</title>
-</head>
-<body>
-    <h2>Nhập mã xác minh</h2>
-    <?php if ($message): ?>
-        <p style="color:red;"><?php echo htmlspecialchars($message); ?></p>
-    <?php endif; ?>
+<div class="container">
+    <div class="form-box">
+        <h2>Xác nhận OTP</h2>
+        <p>Vui lòng nhập mã xác nhận được gửi về email đăng ký</p>
 
-    <form method="post">
-        <label>Mã OTP:</label>
-        <input type="text" name="otp" required>
-        <button type="submit">Xác minh</button>
-    </form>
+        <?php if (!empty($message)): ?>
+            <p class="message" style="color:red;"><?= htmlspecialchars($message) ?></p>
+        <?php endif; ?>
 
-    <form action="login.php" method="get" style="display:inline;">
-        <button type="submit">Đăng nhập</button>
-    </form>
-</body>
-</html>
+        <form method="post" onsubmit="combineOTP(); return true;">
+            <div class="otp-inputs">
+                <input type="text" maxlength="1" oninput="moveNext(this, 'otp2')" id="otp1">
+                <input type="text" maxlength="1" oninput="moveNext(this, 'otp3')" id="otp2">
+                <input type="text" maxlength="1" oninput="moveNext(this, 'otp4')" id="otp3">
+                <input type="text" maxlength="1" oninput="moveNext(this, 'otp5')" id="otp4">
+                <input type="text" maxlength="1" oninput="moveNext(this, 'otp6')" id="otp5">
+                <input type="text" maxlength="1" id="otp6">
+            </div>
+
+            <!-- Input ẩn để gửi OTP gộp -->
+            <input type="hidden" name="otp" id="otpHidden">
+
+            <button type="submit">Xác nhận</button>
+        </form>
+
+        <form action="index.php?page=login" method="get" style="margin-top:10px;">
+            <button type="submit" class="login-btn">Đăng nhập</button>
+        </form>
+    </div>
+</div>
+
+<script>
+function moveNext(current, nextId) {
+    if (current.value.length === 1 && nextId) {
+        document.getElementById(nextId).focus();
+    }
+}
+
+function combineOTP() {
+    let otp = '';
+    for (let i = 1; i <= 6; i++) {
+        otp += document.getElementById('otp' + i).value;
+    }
+    document.getElementById('otpHidden').value = otp;
+}
+</script>
