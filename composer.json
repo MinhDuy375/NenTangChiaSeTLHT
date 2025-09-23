@@ -1,18 +1,4 @@
 {
-    "name": "admin/nen-tang-chia-se-tlht",
-    "description": "config",
-    "type": "project",
-    "autoload": {
-        "psr-4": {
-            "Admin\\NenTangChiaSeTlht\\": "src/"
-        }
-    },
-    "authors": [
-        {
-            "name": "MinhDuy375",
-            "email": "minhduy37a@gmail.com"
-        }
-    ],
     "require": {
         "phpmailer/phpmailer": "^6.10"
     }

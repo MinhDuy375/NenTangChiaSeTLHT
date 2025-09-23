@@ -1,6 +1,11 @@
 <?php
-// Kết nối database
-require './config/ketNoiDB.php';
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+require 'ketNoiDB.php'; // file này tạo kết nối PDO: $conn = new PDO(...)
+require 'vendor/autoload.php'; // cần cài: composer require phpmailer/phpmailer
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
 
 $message = '';
 
@@ -10,47 +15,75 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (empty($email)) {
         $message = "Vui lòng nhập email.";
     } else {
-        // Kiểm tra email có tồn tại trong database không
-        $stmt = $conn->prepare("SELECT id FROM users WHERE email = ?");
-        $stmt->bind_param("s", $email);
-        $stmt->execute();
-        $result = $stmt->get_result();
+        try {
+            // Kiểm tra email có tồn tại trong DB không
+            $stmt =$pdo ->prepare("SELECT id FROM nguoi_dung WHERE email = ?");
+            $stmt->execute([$email]);
+            $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        if ($result->num_rows === 0) {
-            $message = "Email không tồn tại trong hệ thống.";
-        } else {
-            // Ở đây bạn sẽ tạo token reset mật khẩu và gửi email
-            // Giả lập gửi email thành công
-            $message = "Một email chứa hướng dẫn đổi mật khẩu đã được gửi tới: $email";
+            if (!$user) {
+                $message = "Email chưa được đăng ký.";
+            } else {
+                // Tạo OTP ngẫu nhiên
+                $otp = rand(100000, 999999);
+
+                // Lưu OTP vào session (hết hạn sau 5 phút)
+                $_SESSION['reset_email'] = $email;
+                $_SESSION['reset_otp']   = $otp;
+                $_SESSION['otp_expire']  = time() + 300;
+
+                // Gửi OTP qua email
+                $mail = new PHPMailer(true);
+                try {
+                   $mail->isSMTP();
+                $mail->Host       = 'smtp.gmail.com';
+                $mail->SMTPAuth   = true;
+                $mail->Username   = 'doyousay987@gmail.com';
+                $mail->Password   = 'ppty zzgt xtho wquw'; // app password
+                $mail->SMTPSecure = 'tls';
+                $mail->Port       = 587;
+
+                $mail->setFrom('doyousay987@gmail.com', 'web sharing learning materials');
+                $mail->addAddress($email, $name);
+
+                    $mail->isHTML(true);
+                    $mail->Subject = 'Mã OTP đặt lại mật khẩu';
+                    $mail->Body    = "Mã OTP của bạn là: <b>$otp</b>. Có hiệu lực trong 5 phút.";
+
+                    $mail->send();
+
+                    // Chuyển sang trang verify OTP
+                    header("Location: index.php?page=verify_forgot");
+                    exit;
+                } catch (Exception $e) {
+                    $message = "Không thể gửi OTP. Lỗi: {$mail->ErrorInfo}";
+                }
+            }
+        } catch (PDOException $e) {
+            $message = "Lỗi truy vấn: " . $e->getMessage();
         }
-        $stmt->close();
     }
 }
 ?>
 
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Quên mật khẩu</title>
-</head>
-<body>
+<div class="container">
+    <div class="form-box">
+        <h2>Quên mật khẩu</h2>
 
-<h2>Quên mật khẩu</h2>
+        <?php if (!empty($message)): ?>
+            <p class="message" style="color:red;"><?php echo htmlspecialchars($message); ?></p>
+        <?php endif; ?>
 
-<?php if ($message): ?>
-    <p><?php echo htmlspecialchars($message); ?></p>
-<?php endif; ?>
+        <form method="post" action="">
+            <label for="email">Nhập email của bạn:</label>
+            <input type="email" name="email" id="email" required>
+            <input type="submit" value="Gửi OTP">
+        </form>
 
-<form method="post" action="">
-    <label for="email">Nhập email của bạn:</label><br>
-    <input type="email" name="email" id="email" required><br><br>
-    <input type="submit" value="Gửi yêu cầu">
-</form>
-
-   <!-- Nút Đăng nhập -->
-    <form action="login.php" method="get" style="display:inline;">
-        <button type="submit">Đăng nhập</button>
-    </form>
-
-</body>
-</html>
+        <!-- Nút về trang đăng nhập -->
+        <form action="index.php" method="get" style="margin-top:10px;">
+            <input type="hidden" name="page" value="login">
+            <button type="submit" class="login-btn">Đăng nhập</button>
+        </form>
+    </div>
+</div>
