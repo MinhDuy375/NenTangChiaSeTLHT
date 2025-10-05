@@ -27,7 +27,7 @@ switch ($page) {
         break;
     case 'chitiettailieu':
         include "src/Views/chiTietTaiLieu.php";
-        break;     
+        break;
     case 'contact':
         include "src/Views/lienHe.php";
         break;
@@ -39,13 +39,20 @@ switch ($page) {
         break;
     case 'source_upload':
         include "src/Views/dangTaiNguon.php";
-        break;    
+        break;
     case 'source_detail':
         include "src/Views/chiTietNguon.php";
+<<<<<<< HEAD
         break;  
      case 'login':
         include "login.php";
         break;  
+=======
+        break;
+    case 'login':
+        include "login.php";
+        break;
+>>>>>>> 997f1eccef222cabf5d875c2691213ae92c3f92d
     case 'logout':
         include "logout.php";
         break;
@@ -64,6 +71,16 @@ switch ($page) {
     case 'forgotpass':
         include "forgotpass.php";
         break;
+<<<<<<< HEAD
+=======
+    case 'them_mon':
+        include "src/Views/dangTaiMonHoc.php";
+        break;
+    case 'them_danh_muc':
+        include "src/Views/dangTaiDanhMuc.php";
+        break;
+
+>>>>>>> 997f1eccef222cabf5d875c2691213ae92c3f92d
 
     default:
         echo "<div style='text-align: center; padding: 50px;'>";
