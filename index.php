@@ -42,46 +42,37 @@ switch ($page) {
         break;
     case 'source_detail':
         include "src/Views/chiTietNguon.php";
-<<<<<<< HEAD
-        break;  
-     case 'login':
-        include "login.php";
-        break;  
-=======
         break;
     case 'login':
-        include "login.php";
+        include "src/Views/login.php";
         break;
->>>>>>> 997f1eccef222cabf5d875c2691213ae92c3f92d
     case 'logout':
-        include "logout.php";
+        include "src/Views/logout.php";
         break;
     case 'register':
-        include "register.php";
+        include "src/Views/register.php";
         break;
     case 'reset_password':
-        include "reset_password.php";
+        include "src/Views/reset_password.php";
         break;
     case 'verify_forgot':
-        include "verify_forgot.php";
+        include "src/Views/verify_forgot.php";
         break;
     case 'verify':
-        include "verify.php";
+        include "src/Views/verify.php";
         break;
     case 'forgotpass':
-        include "forgotpass.php";
+        include "src/Views/forgotpass.php";
         break;
-<<<<<<< HEAD
-=======
     case 'them_mon':
         include "src/Views/dangTaiMonHoc.php";
         break;
     case 'them_danh_muc':
         include "src/Views/dangTaiDanhMuc.php";
         break;
-
->>>>>>> 997f1eccef222cabf5d875c2691213ae92c3f92d
-
+    case 'thu_vien':
+        include "src/Views/thuVienCaNhan.php";
+        break;
     default:
         echo "<div style='text-align: center; padding: 50px;'>";
         echo "<h2>404 - Không tìm thấy trang</h2>";
@@ -94,4 +85,4 @@ switch ($page) {
 $content = ob_get_clean();
 
 // Include layout
-include "layout.php";
+include "src/Views/layout.php";

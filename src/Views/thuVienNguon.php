@@ -13,7 +13,7 @@ $sql = "SELECT b.*, u.ten_dang_nhap, d.ten_danh_muc
         FROM bai_chia_se b
         LEFT JOIN nguoi_dung u ON b.id_nguoi_dung = u.id
         LEFT JOIN danh_muc d ON b.id_danh_muc = d.id
-        WHERE b.loai = 'du_an'";
+        WHERE b.loai = 'bai_viet'";
 
 $params = [];
 if (!empty($keyword)) {
@@ -43,119 +43,6 @@ ob_start();
         margin: 0 auto;
         padding: 20px;
     }
-<<<<<<< HEAD
-    
-    .library-header {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        padding: 40px 30px;
-        text-align: center;
-        border-radius: 15px;
-        margin-bottom: 30px;
-        box-shadow: 0 8px 32px rgba(0,0,0,0.1);
-    }
-    
-    .library-header h2 {
-        font-size: 2.5em;
-        margin-bottom: 10px;
-        font-weight: 700;
-    }
-    
-    .library-header p {
-        font-size: 1.2em;
-        opacity: 0.9;
-        max-width: 600px;
-        margin: 0 auto;
-        line-height: 1.6;
-    }
-
-    .search-section {
-        background: white;
-        padding: 25px;
-        border-radius: 15px;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-        margin-bottom: 30px;
-    }
-    
-    .search-form {
-        display: flex;
-        gap: 15px;
-        align-items: end;
-        flex-wrap: wrap;
-    }
-    
-    .search-group {
-        flex: 1;
-        min-width: 200px;
-    }
-    
-    .search-group label {
-        display: block;
-        margin-bottom: 8px;
-        font-weight: 600;
-        color: #333;
-        font-size: 14px;
-    }
-    
-    .search-input, .search-select {
-        width: 100%;
-        padding: 12px 18px;
-        border: 2px solid #e1e5e9;
-        border-radius: 12px;
-        font-size: 15px;
-        transition: all 0.3s ease;
-        background: #fafafa;
-    }
-    
-    .search-input:focus, .search-select:focus {
-        outline: none;
-        border-color: #007bff;
-        background: white;
-        box-shadow: 0 0 0 4px rgba(0,123,255,0.1);
-    }
-    
-    .search-buttons {
-        display: flex;
-        gap: 10px;
-        align-items: end;
-    }
-    
-    .btn {
-        padding: 12px 24px;
-        border: none;
-        border-radius: 12px;
-        font-size: 15px;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        text-decoration: none;
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        white-space: nowrap;
-    }
-    
-    .btn-primary {
-        background: linear-gradient(135deg, #007bff, #0056b3);
-        color: white;
-    }
-    
-    .btn-primary:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 25px rgba(0,123,255,0.3);
-    }
-    
-    .btn-success {
-        background: linear-gradient(135deg, #28a745, #1e7e34);
-        color: white;
-    }
-    
-    .btn-success:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 25px rgba(40,167,69,0.3);
-    }
-
-=======
 
     .library-header {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -269,36 +156,23 @@ ob_start();
         box-shadow: 0 8px 25px rgba(40, 167, 69, 0.3);
     }
 
->>>>>>> 997f1eccef222cabf5d875c2691213ae92c3f92d
     .posts-grid {
         display: grid;
         gap: 25px;
         grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
     }
-<<<<<<< HEAD
-    
-=======
 
->>>>>>> 997f1eccef222cabf5d875c2691213ae92c3f92d
     .post-card {
         background: white;
         border-radius: 16px;
         padding: 25px;
-<<<<<<< HEAD
-        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-=======
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
->>>>>>> 997f1eccef222cabf5d875c2691213ae92c3f92d
         transition: all 0.3s ease;
         border: 1px solid #f0f0f0;
         position: relative;
         overflow: hidden;
     }
-<<<<<<< HEAD
-    
-=======
 
->>>>>>> 997f1eccef222cabf5d875c2691213ae92c3f92d
     .post-card::before {
         content: '';
         position: absolute;
@@ -308,17 +182,10 @@ ob_start();
         height: 4px;
         background: linear-gradient(90deg, #667eea, #764ba2);
     }
-<<<<<<< HEAD
-    
-    .post-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 12px 40px rgba(0,0,0,0.15);
-=======
 
     .post-card:hover {
         transform: translateY(-5px);
         box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
->>>>>>> 997f1eccef222cabf5d875c2691213ae92c3f92d
     }
 
     .post-header {
@@ -453,11 +320,7 @@ ob_start();
 
     .view-detail-btn:hover {
         transform: translateY(-1px);
-<<<<<<< HEAD
-        box-shadow: 0 6px 20px rgba(0,123,255,0.3);
-=======
         box-shadow: 0 6px 20px rgba(0, 123, 255, 0.3);
->>>>>>> 997f1eccef222cabf5d875c2691213ae92c3f92d
     }
 
     .empty-state {
@@ -465,11 +328,7 @@ ob_start();
         padding: 80px 20px;
         background: white;
         border-radius: 16px;
-<<<<<<< HEAD
-        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-=======
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
->>>>>>> 997f1eccef222cabf5d875c2691213ae92c3f92d
     }
 
     .empty-state h3 {
@@ -488,28 +347,6 @@ ob_start();
     @media (max-width: 768px) {
         .library-container {
             padding: 15px;
-<<<<<<< HEAD
-        }
-        
-        .library-header {
-            padding: 25px 20px;
-            margin-bottom: 20px;
-        }
-        
-        .library-header h2 {
-            font-size: 2em;
-        }
-        
-        .search-form {
-            flex-direction: column;
-            gap: 20px;
-        }
-        
-        .search-buttons {
-            justify-content: center;
-        }
-        
-=======
         }
 
         .library-header {
@@ -530,34 +367,21 @@ ob_start();
             justify-content: center;
         }
 
->>>>>>> 997f1eccef222cabf5d875c2691213ae92c3f92d
         .posts-grid {
             grid-template-columns: 1fr;
             gap: 20px;
         }
-<<<<<<< HEAD
-        
-        .post-card {
-            padding: 20px;
-        }
-        
-=======
 
         .post-card {
             padding: 20px;
         }
 
->>>>>>> 997f1eccef222cabf5d875c2691213ae92c3f92d
         .post-actions {
             flex-direction: column;
             gap: 15px;
             align-items: stretch;
         }
-<<<<<<< HEAD
-        
-=======
 
->>>>>>> 997f1eccef222cabf5d875c2691213ae92c3f92d
         .view-detail-btn {
             text-align: center;
         }
@@ -573,17 +397,6 @@ ob_start();
     <div class="search-section">
         <form method="get" action="index.php" class="search-form">
             <input type="hidden" name="page" value="source">
-<<<<<<< HEAD
-            
-            <div class="search-group">
-                <label for="keyword">🔍 Từ khóa tìm kiếm</label>
-                <input type="text" 
-                       id="keyword"
-                       name="keyword" 
-                       placeholder="Nhập tên dự án, công nghệ, mô tả..." 
-                       value="<?= htmlspecialchars($keyword) ?>" 
-                       class="search-input">
-=======
 
             <div class="search-group">
                 <label for="keyword">🔍 Từ khóa tìm kiếm</label>
@@ -593,34 +406,8 @@ ob_start();
                     placeholder="Nhập tên dự án, công nghệ, mô tả..."
                     value="<?= htmlspecialchars($keyword) ?>"
                     class="search-input">
->>>>>>> 997f1eccef222cabf5d875c2691213ae92c3f92d
             </div>
-            
-            <div class="search-group">
-                <label for="category">📂 Danh mục</label>
-                <select name="id_danh_muc" id="category" class="search-select">
-                    <option value="">Tất cả danh mục</option>
-                    <?php foreach ($danh_muc as $dm): ?>
-                        <option value="<?= $dm['id'] ?>" <?= $id_danh_muc == $dm['id'] ? 'selected' : '' ?>>
-                            <?= htmlspecialchars($dm['ten_danh_muc']) ?>
-                        </option>
-                    <?php endforeach; ?>
-                </select>
-            </div>
-            
-            <div class="search-buttons">
-                <button type="submit" class="btn btn-primary">
-                    🔍 Tìm kiếm
-                </button>
-                <a href="index.php?page=source_upload" class="btn btn-success">
-                    ➕ Đăng mã nguồn
-                </a>
-            </div>
-        </form>
-    </div>
 
-<<<<<<< HEAD
-=======
             <div class="search-group">
                 <label for="category">📂 Danh mục</label>
                 <select name="id_danh_muc" id="category" class="search-select">
@@ -648,16 +435,11 @@ ob_start();
         </form>
     </div>
 
->>>>>>> 997f1eccef222cabf5d875c2691213ae92c3f92d
     <?php if (empty($ds_ma_nguon)): ?>
         <div class="empty-state">
             <h3>🔍 Không tìm thấy mã nguồn</h3>
             <p>Hiện tại chưa có mã nguồn nào phù hợp với từ khóa tìm kiếm của bạn.<br>
-<<<<<<< HEAD
-               Hãy thử tìm kiếm với từ khóa khác hoặc trở thành người đầu tiên chia sẻ!</p>
-=======
                 Hãy thử tìm kiếm với từ khóa khác hoặc trở thành người đầu tiên chia sẻ!</p>
->>>>>>> 997f1eccef222cabf5d875c2691213ae92c3f92d
             <a href="index.php?page=source_upload" class="btn btn-primary">
                 ➕ Đăng mã nguồn đầu tiên
             </a>
@@ -678,19 +460,11 @@ ob_start();
                             </div>
                         </div>
                     </div>
-<<<<<<< HEAD
-                    
-                    <h3 class="post-title"><?= htmlspecialchars($item['tieu_de']) ?></h3>
-                    
-                    <div class="post-description">
-                        <?php 
-=======
 
                     <h3 class="post-title"><?= htmlspecialchars($item['tieu_de']) ?></h3>
 
                     <div class="post-description">
                         <?php
->>>>>>> 997f1eccef222cabf5d875c2691213ae92c3f92d
                         $mo_ta = htmlspecialchars($item['mo_ta']);
                         if (strlen($mo_ta) > 200) {
                             $mo_ta = substr($mo_ta, 0, 200) . '...';
@@ -698,11 +472,7 @@ ob_start();
                         echo $mo_ta;
                         ?>
                     </div>
-<<<<<<< HEAD
-                    
-=======
 
->>>>>>> 997f1eccef222cabf5d875c2691213ae92c3f92d
                     <?php if (!empty($item['cong_nghe'])): ?>
                         <div class="tech-badge">
                             💻 <?= htmlspecialchars($item['cong_nghe']) ?>
@@ -729,75 +499,6 @@ ob_start();
 </div>
 
 <script>
-<<<<<<< HEAD
-function toggleLike(button, postId) {
-    const isLiked = button.classList.contains('liked');
-    
-    if (isLiked) {
-        button.classList.remove('liked');
-        button.style.color = '#666';
-        button.style.background = '';
-    } else {
-        button.classList.add('liked');
-        button.style.color = '#28a745';
-        button.style.background = '#f8fff8';
-        
-        // Remove dislike if exists
-        const dislikeBtn = button.nextElementSibling;
-        dislikeBtn.classList.remove('liked');
-        dislikeBtn.style.color = '#666';
-        dislikeBtn.style.background = '';
-    }
-    
-    // Ở đây bạn có thể thêm AJAX call để lưu vào database
-    console.log(`Post ${postId} ${isLiked ? 'unliked' : 'liked'}`);
-}
-
-function toggleDislike(button, postId) {
-    const isDisliked = button.classList.contains('liked');
-    
-    if (isDisliked) {
-        button.classList.remove('liked');
-        button.style.color = '#666';
-        button.style.background = '';
-    } else {
-        button.classList.add('liked');
-        button.style.color = '#e74c3c';
-        button.style.background = '#fff8f8';
-        
-        // Remove like if exists
-        const likeBtn = button.previousElementSibling;
-        likeBtn.classList.remove('liked');
-        likeBtn.style.color = '#666';
-        likeBtn.style.background = '';
-    }
-    
-    // Ở đây bạn có thể thêm AJAX call để lưu vào database
-    console.log(`Post ${postId} ${isDisliked ? 'undisliked' : 'disliked'}`);
-}
-
-// Animation khi scroll
-document.addEventListener('DOMContentLoaded', function() {
-    const cards = document.querySelectorAll('.post-card');
-    
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.style.opacity = '1';
-                entry.target.style.transform = 'translateY(0)';
-            }
-        });
-    });
-    
-    cards.forEach(card => {
-        card.style.opacity = '0';
-        card.style.transform = 'translateY(30px)';
-        card.style.transition = 'all 0.6s ease';
-        observer.observe(card);
-    });
-});
-</script>
-=======
     function toggleLike(button, postId) {
         const isLiked = button.classList.contains('liked');
 
@@ -865,4 +566,3 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 </script>
->>>>>>> 997f1eccef222cabf5d875c2691213ae92c3f92d

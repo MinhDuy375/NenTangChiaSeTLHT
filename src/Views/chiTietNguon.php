@@ -17,7 +17,7 @@ $sql = "SELECT b.*, u.ten_dang_nhap, d.ten_danh_muc
         FROM bai_chia_se b
         LEFT JOIN nguoi_dung u ON b.id_nguoi_dung = u.id
         LEFT JOIN danh_muc d ON b.id_danh_muc = d.id
-        WHERE b.id = :id AND b.loai = 'du_an'";
+        WHERE b.id = :id AND b.loai = 'bai_viet'";
 
 $stmt = $pdo->prepare($sql);
 $stmt->execute(['id' => $id]);
@@ -42,6 +42,7 @@ ob_start();
 
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -52,12 +53,12 @@ ob_start();
             padding: 0;
             box-sizing: border-box;
         }
-        
-        body { 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: #f8f9fa;
         }
-        
+
         /* Header styles - tương thích với layout.php */
         /* .main-header { 
             position: fixed;   
@@ -74,7 +75,7 @@ ob_start();
             height: 70px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         } */
-        
+
         /* .logo {
             font-size: 24px;
             font-weight: bold;
@@ -187,21 +188,21 @@ ob_start();
             background: #ff4d4f;
             transform: translateY(-1px);
         } */
-        
-        main { 
-           
+
+        main {
+
             min-height: calc(100vh - 130px);
             background-color: #f8f9fa;
         }
-        
-        footer { 
-            background: #007bff; 
+
+        footer {
+            background: #007bff;
             color: white;
-            text-align: center; 
+            text-align: center;
             padding: 20px;
             margin-top: auto;
         }
-        
+
         .footer-content {
             max-width: 1200px;
             margin: 0 auto;
@@ -231,19 +232,19 @@ ob_start();
             font-weight: 600;
             font-size: 14px;
             transition: all 0.3s;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
         }
 
         .back-btn:hover {
             background: #f8f9fa;
             transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
 
         .post-container {
             background: white;
             border-radius: 16px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
             overflow: hidden;
             border: 1px solid #f0f0f0;
         }
@@ -349,7 +350,7 @@ ob_start();
         .link-card:hover {
             border-color: #007bff;
             transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(0,123,255,0.15);
+            box-shadow: 0 8px 25px rgba(0, 123, 255, 0.15);
         }
 
         .link-content {
@@ -537,7 +538,7 @@ ob_start();
 
         .comment-input:focus {
             border-color: #007bff;
-            box-shadow: 0 0 0 3px rgba(0,123,255,0.1);
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
         }
 
         .comment {
@@ -556,7 +557,7 @@ ob_start();
             border-radius: 16px;
             margin-bottom: 8px;
             border: 1px solid #f0f0f0;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
         }
 
         .comment-author {
@@ -594,7 +595,7 @@ ob_start();
             padding: 60px 20px;
             background: white;
             border-radius: 16px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
         }
 
         .empty-state h3 {
@@ -619,62 +620,71 @@ ob_start();
         }
 
         @media (max-width: 768px) {
-            
-            
+
+
             .user-section {
                 margin-left: 0;
                 margin-top: 10px;
             }
-            
+
             main {
                 padding-top: 120px;
             }
-            
+
             .detail-container {
                 padding: 15px;
             }
-            
-            .post-header, .post-content, .post-stats, .post-actions, .comments-section {
+
+            .post-header,
+            .post-content,
+            .post-stats,
+            .post-actions,
+            .comments-section {
                 padding-left: 20px;
                 padding-right: 20px;
             }
-            
+
             .post-title {
                 font-size: 24px;
             }
-            
+
             .post-actions {
                 flex-direction: column;
                 gap: 8px;
             }
-            
+
             .user-name {
                 display: none;
             }
         }
-        
+
         @media (max-width: 480px) {
-           
-            
-         
-            
-            .post-header, .post-content, .post-stats, .post-actions, .comments-section {
+
+
+
+
+            .post-header,
+            .post-content,
+            .post-stats,
+            .post-actions,
+            .comments-section {
                 padding-left: 15px;
                 padding-right: 15px;
             }
         }
     </style>
 </head>
+
 <body>
- 
-    
+
+
     <main>
         <div class="detail-container">
             <?php if (!$item): ?>
                 <div class="empty-state">
                     <h3>❌ Không tìm thấy mã nguồn</h3>
                     <p>Bài viết có thể đã bị xóa hoặc không tồn tại.<br>
-                       Vui lòng kiểm tra lại đường link hoặc quay về trang chủ.</p>
+                        Vui lòng kiểm tra lại đường link hoặc quay về trang chủ.</p>
                     <div style="margin-top: 20px;">
                         <a href="index.php?page=source" style="background: #007bff; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; display: inline-block;">
                             ← Quay về Thư viện nguồn
@@ -786,7 +796,7 @@ ob_start();
                         <div class="comments-header">
                             💬 Bình luận (<?= count($comments ?? []) ?>)
                         </div>
-                        
+
                         <div class="comment-input-container">
                             <div class="comment-avatar">
                                 <?= $is_logged_in ? strtoupper(substr($username, 0, 1)) : 'U' ?>
@@ -823,7 +833,7 @@ ob_start();
             <?php endif; ?>
         </div>
     </main>
-    
+
     <footer>
         <div class="footer-content">
             <p>&copy; <?= date("Y") ?> Sharedy - Hệ thống chia sẻ tài liệu học tập</p>
@@ -837,7 +847,7 @@ ob_start();
         // Functionality for like/dislike buttons
         document.getElementById('likeBtn').addEventListener('click', function() {
             const isActive = this.classList.contains('active');
-            
+
             // Toggle like button
             if (isActive) {
                 this.classList.remove('active');
@@ -846,14 +856,14 @@ ob_start();
                 // Remove dislike if active
                 document.getElementById('dislikeBtn').classList.remove('active');
             }
-            
+
             // Here you can add AJAX call to update database
             console.log(isActive ? 'Unliked' : 'Liked');
         });
 
         document.getElementById('dislikeBtn').addEventListener('click', function() {
             const isActive = this.classList.contains('active');
-            
+
             // Toggle dislike button
             if (isActive) {
                 this.classList.remove('active');
@@ -862,16 +872,16 @@ ob_start();
                 // Remove like if active
                 document.getElementById('likeBtn').classList.remove('active');
             }
-            
+
             // Here you can add AJAX call to update database
             console.log(isActive ? 'Undisliked' : 'Disliked');
         });
 
         document.getElementById('commentBtn').addEventListener('click', function() {
             document.querySelector('.comment-input').focus();
-            document.querySelector('.comment-input').scrollIntoView({ 
-                behavior: 'smooth', 
-                block: 'center' 
+            document.querySelector('.comment-input').scrollIntoView({
+                behavior: 'smooth',
+                block: 'center'
             });
         });
 
@@ -916,7 +926,7 @@ ob_start();
             button.addEventListener('click', function() {
                 const originalText = this.innerHTML;
                 this.style.opacity = '0.7';
-                
+
                 setTimeout(() => {
                     this.style.opacity = '1';
                 }, 200);
@@ -937,14 +947,14 @@ ob_start();
                     const original = linkUrl.textContent;
                     linkUrl.textContent = 'Đã copy!';
                     linkUrl.style.color = '#28a745';
-                    
+
                     setTimeout(() => {
                         linkUrl.textContent = original;
                         linkUrl.style.color = '#666';
                     }, 1500);
                 });
             });
-            
+
             linkUrl.style.cursor = 'pointer';
             linkUrl.title = 'Click để copy link';
         });
@@ -976,9 +986,9 @@ ob_start();
             transition: all 0.3s ease;
             z-index: 1000;
         `;
-        
+
         document.body.appendChild(scrollToTopBtn);
-        
+
         window.addEventListener('scroll', function() {
             if (window.pageYOffset > 300) {
                 scrollToTopBtn.style.opacity = '1';
@@ -986,7 +996,7 @@ ob_start();
                 scrollToTopBtn.style.opacity = '0';
             }
         });
-        
+
         scrollToTopBtn.addEventListener('click', function() {
             window.scrollTo({
                 top: 0,
@@ -1000,7 +1010,7 @@ ob_start();
             if (postContainer) {
                 postContainer.style.opacity = '0';
                 postContainer.style.transform = 'translateY(30px)';
-                
+
                 setTimeout(() => {
                     postContainer.style.transition = 'all 0.6s ease';
                     postContainer.style.opacity = '1';
@@ -1010,6 +1020,7 @@ ob_start();
         });
     </script>
 </body>
+
 </html>
 
 <?php
@@ -1018,7 +1029,7 @@ $content = ob_get_clean();
 
 // Tìm đường dẫn đúng đến layout.php
 
-   include __DIR__ . '/../../layout.php';
+include __DIR__ . '\layout.php';
 
 
 ?>
