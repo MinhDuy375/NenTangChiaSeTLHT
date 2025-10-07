@@ -27,7 +27,7 @@ switch ($page) {
         break;
     case 'chitiettailieu':
         include "src/Views/chiTietTaiLieu.php";
-        break;     
+        break;
     case 'contact':
         include "src/Views/lienHe.php";
         break;
@@ -39,32 +39,40 @@ switch ($page) {
         break;
     case 'source_upload':
         include "src/Views/dangTaiNguon.php";
-        break;    
+        break;
     case 'source_detail':
         include "src/Views/chiTietNguon.php";
-        break;  
-     case 'login':
-        include "login.php";
-        break;  
+        break;
+    case 'login':
+        include "src/Views/login.php";
+        break;
     case 'logout':
-        include "logout.php";
+        include "src/Views/logout.php";
         break;
     case 'register':
-        include "register.php";
+        include "src/Views/register.php";
         break;
     case 'reset_password':
-        include "reset_password.php";
+        include "src/Views/reset_password.php";
         break;
     case 'verify_forgot':
-        include "verify_forgot.php";
+        include "src/Views/verify_forgot.php";
         break;
     case 'verify':
-        include "verify.php";
+        include "src/Views/verify.php";
         break;
     case 'forgotpass':
-        include "forgotpass.php";
+        include "src/Views/forgotpass.php";
         break;
-
+    case 'them_mon':
+        include "src/Views/dangTaiMonHoc.php";
+        break;
+    case 'them_danh_muc':
+        include "src/Views/dangTaiDanhMuc.php";
+        break;
+    case 'thu_vien':
+        include "src/Views/thuVienCaNhan.php";
+        break;
     default:
         echo "<div style='text-align: center; padding: 50px;'>";
         echo "<h2>404 - Không tìm thấy trang</h2>";
@@ -77,4 +85,4 @@ switch ($page) {
 $content = ob_get_clean();
 
 // Include layout
-include "layout.php";
+include "src/Views/layout.php";
