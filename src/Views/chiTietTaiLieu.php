@@ -1,95 +1,70 @@
 <?php
-// chi_tiet_tai_lieu.php - Trang chi tiết tài liệu với preview
-// Đặt file này trong thư mục src/Views/
+session_start();
 include __DIR__ . '/../../config/ketNoiDB.php';
 
-// Lấy ID tài liệu từ URL
+// Lấy ID tài liệu
 $id_tai_lieu = isset($_GET['id']) ? (int)$_GET['id'] : 0;
-
 if ($id_tai_lieu <= 0) {
-    header('Location: danhSachMon.php');
+    header('Location: index.php?page=monhoc');
     exit;
 }
 
-// Lấy thông tin chi tiết tài liệu
+// ========== Lấy thông tin tài liệu ==========
 try {
-    $sql = "SELECT bcs.*, mh.ten_mon, nd.ho_ten as ten_nguoi_dang, nd.email as email_nguoi_dang
-            FROM bai_chia_se bcs 
+    $sql = "SELECT bcs.*, mh.ten_mon, nd.ho_ten AS ten_nguoi_dang, nd.email AS email_nguoi_dang
+            FROM bai_chia_se bcs
             LEFT JOIN mon_hoc mh ON bcs.id_mon_hoc = mh.id
             LEFT JOIN nguoi_dung nd ON bcs.id_nguoi_dung = nd.id
             WHERE bcs.id = :id_tai_lieu AND bcs.loai = 'tai_lieu'";
-    
     $stmt = $pdo->prepare($sql);
     $stmt->execute([':id_tai_lieu' => $id_tai_lieu]);
     $tai_lieu = $stmt->fetch();
-    
     if (!$tai_lieu) {
-        header('Location: danhSachMon.php');
+        header('Location: index.php?page=monhoc');
         exit;
     }
 } catch (PDOException $e) {
     die("Lỗi truy vấn: " . $e->getMessage());
 }
 
-// Lấy các tài liệu liên quan (cùng môn học)
+// ========== Lấy tài liệu liên quan ==========
 try {
-    $sql_lien_quan = "SELECT bcs.id, bcs.tieu_de, bcs.tom_tat, bcs.file_upload, bcs.ngay_tao
-                      FROM bai_chia_se bcs 
-                      WHERE bcs.id_mon_hoc = :id_mon_hoc 
-                      AND bcs.id != :id_tai_lieu 
-                      AND bcs.loai = 'tai_lieu'
-                      ORDER BY bcs.ngay_tao DESC 
-                      LIMIT 4";
-    
-    $stmt_lien_quan = $pdo->prepare($sql_lien_quan);
-    $stmt_lien_quan->execute([
-        ':id_mon_hoc' => $tai_lieu['id_mon_hoc'],
-        ':id_tai_lieu' => $id_tai_lieu
-    ]);
-    $tai_lieu_lien_quan = $stmt_lien_quan->fetchAll();
-} catch (PDOException $e) {
-    $tai_lieu_lien_quan = array();
+    $sql_lq = "SELECT id, tieu_de, tom_tat, file_upload, ngay_tao
+               FROM bai_chia_se
+               WHERE id_mon_hoc = :idmh AND id != :idtl AND loai = 'tai_lieu'
+               ORDER BY ngay_tao DESC LIMIT 4";
+    $stmt = $pdo->prepare($sql_lq);
+    $stmt->execute([':idmh' => $tai_lieu['id_mon_hoc'], ':idtl' => $id_tai_lieu]);
+    $tai_lieu_lien_quan = $stmt->fetchAll();
+} catch (Exception $e) {
+    $tai_lieu_lien_quan = [];
 }
 
-// Hàm tạo URL preview cho Google Docs Viewer
+// ===== Các hàm phụ =====
 function tao_url_preview($duong_dan_file) {
-    $base_url = 'http://' . $_SERVER['HTTP_HOST'] . dirname($_SERVER['PHP_SELF']) . '/';
-    $file_url = $base_url . $duong_dan_file;
-    return 'https://docs.google.com/viewer?url=' . urlencode($file_url) . '&embedded=true';
+    $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? "https://" : "http://";
+    $base = $protocol . $_SERVER['HTTP_HOST'] . dirname($_SERVER['PHP_SELF']) . '/';
+    return 'https://docs.google.com/viewer?url=' . urlencode($base . $duong_dan_file) . '&embedded=true';
 }
-
-// Hàm lấy icon theo loại file
-function lay_icon_file($duong_dan_file) {
-    $duoi_file = strtolower(pathinfo($duong_dan_file, PATHINFO_EXTENSION));
-    switch ($duoi_file) {
-        case 'pdf':
-            return '📄';
-        case 'doc':
-        case 'docx':
-            return '📝';
-        default:
-            return '📎';
-    }
+function lay_icon_file($file) {
+    $ext = strtolower(pathinfo($file, PATHINFO_EXTENSION));
+    return match($ext) {
+        'pdf' => '📄', 'doc', 'docx' => '📝', default => '📎'
+    };
 }
-
-// Hàm tính kích thước file
-function tinh_kich_thuoc_file($duong_dan_file) {
-    if (file_exists($duong_dan_file)) {
-        $kich_thuoc = filesize($duong_dan_file);
-        if ($kich_thuoc >= 1048576) {
-            return round($kich_thuoc / 1048576, 2) . ' MB';
-        } elseif ($kich_thuoc >= 1024) {
-            return round($kich_thuoc / 1024, 2) . ' KB';
-        } else {
-            return $kich_thuoc . ' bytes';
-        }
-    }
-    return 'Không xác định';
+function tinh_kich_thuoc_file($file) {
+    return (file_exists($file)) ?
+        (filesize($file) >= 1048576 ?
+            round(filesize($file) / 1048576, 2) . ' MB' :
+            round(filesize($file) / 1024, 2) . ' KB')
+        : 'Không xác định';
 }
 ?>
 
+
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -100,20 +75,21 @@ function tinh_kich_thuoc_file($duong_dan_file) {
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
         }
-        
+
         .container {
             max-width: 1400px;
             margin: 0 auto;
             background: white;
             min-height: 100vh;
         }
-        
+
+
         .header {
             background: linear-gradient(45deg, #2196F3, #21CBF3);
             color: white;
@@ -121,25 +97,50 @@ function tinh_kich_thuoc_file($duong_dan_file) {
             position: sticky;
             top: 0;
             z-index: 100;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
-        
+
         .breadcrumb {
             font-size: 14px;
             opacity: 0.9;
             margin-bottom: 10px;
         }
-        
+
+        .share-btn {
+            background-color: #1877f2;
+            /* xanh Facebook */
+            color: white;
+            border: none;
+            padding: 8px 14px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .share-btn:hover {
+            background-color: #145db2;
+            /* màu đậm hơn khi hover */
+        }
+
+        .share-btn:active {
+            transform: scale(0.96);
+        }
+
         .breadcrumb a {
             color: white;
             text-decoration: none;
             transition: opacity 0.3s;
         }
-        
+
         .breadcrumb a:hover {
             opacity: 0.8;
         }
-        
+
         .header-title {
             font-size: 1.5em;
             font-weight: 600;
@@ -147,10 +148,10 @@ function tinh_kich_thuoc_file($duong_dan_file) {
             align-items: center;
             gap: 10px;
         }
-        
+
         .back-btn {
-            background: rgba(255,255,255,0.2);
-            border: 1px solid rgba(255,255,255,0.3);
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
             color: white;
             padding: 8px 16px;
             text-decoration: none;
@@ -162,31 +163,31 @@ function tinh_kich_thuoc_file($duong_dan_file) {
             transition: all 0.3s;
             margin-right: 15px;
         }
-        
+
         .back-btn:hover {
-            background: rgba(255,255,255,0.3);
+            background: rgba(255, 255, 255, 0.3);
             transform: translateX(-2px);
         }
-        
+
         .main-content {
             display: grid;
             grid-template-columns: 1fr 350px;
             min-height: calc(100vh - 80px);
         }
-        
+
         .preview-section {
             background: #f8f9fa;
             border-right: 1px solid #dee2e6;
             display: flex;
             flex-direction: column;
         }
-        
+
         .preview-header {
             background: white;
             padding: 20px;
             border-bottom: 1px solid #dee2e6;
         }
-        
+
         .preview-title {
             font-size: 1.3em;
             font-weight: 600;
@@ -196,45 +197,70 @@ function tinh_kich_thuoc_file($duong_dan_file) {
             align-items: center;
             gap: 10px;
         }
-        
+
         .preview-meta {
             color: #6c757d;
             font-size: 0.9em;
         }
-        
+
         .preview-container {
             flex: 1;
             padding: 20px;
             display: flex;
             flex-direction: column;
         }
-        
+
+        .share-btn {
+            background-color: #1877f2;
+            /* xanh Facebook */
+            color: white;
+            border: none;
+            padding: 8px 14px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .share-btn:hover {
+            background-color: #145db2;
+            /* màu đậm hơn khi hover */
+        }
+
+        .share-btn:active {
+            transform: scale(0.96);
+        }
+
         .preview-iframe {
             flex: 1;
             border: 1px solid #dee2e6;
             border-radius: 8px;
             background: white;
             min-height: 600px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
-        
+
         .preview-actions {
             margin-top: 15px;
             display: flex;
             gap: 10px;
             flex-wrap: wrap;
         }
-        
+
         .details-section {
             background: white;
             padding: 0;
             overflow-y: auto;
         }
-        
+
         .details-content {
             padding: 30px;
         }
-        
+
         .info-card {
             background: #f8f9fa;
             border-radius: 12px;
@@ -242,7 +268,7 @@ function tinh_kich_thuoc_file($duong_dan_file) {
             margin-bottom: 25px;
             border: 1px solid #e9ecef;
         }
-        
+
         .info-card h3 {
             color: #495057;
             margin-bottom: 15px;
@@ -251,7 +277,7 @@ function tinh_kich_thuoc_file($duong_dan_file) {
             align-items: center;
             gap: 8px;
         }
-        
+
         .info-item {
             display: flex;
             justify-content: space-between;
@@ -259,21 +285,21 @@ function tinh_kich_thuoc_file($duong_dan_file) {
             padding: 8px 0;
             border-bottom: 1px solid #e9ecef;
         }
-        
+
         .info-item:last-child {
             border-bottom: none;
         }
-        
+
         .info-label {
             font-weight: 500;
             color: #495057;
         }
-        
+
         .info-value {
             color: #6c757d;
             text-align: right;
         }
-        
+
         .description-section {
             background: white;
             border-radius: 12px;
@@ -281,7 +307,7 @@ function tinh_kich_thuoc_file($duong_dan_file) {
             margin-bottom: 25px;
             border: 1px solid #e9ecef;
         }
-        
+
         .description-section h3 {
             color: #495057;
             margin-bottom: 15px;
@@ -289,17 +315,17 @@ function tinh_kich_thuoc_file($duong_dan_file) {
             align-items: center;
             gap: 8px;
         }
-        
+
         .description-text {
             color: #6c757d;
             line-height: 1.6;
             white-space: pre-wrap;
         }
-        
+
         .related-section {
             margin-top: 30px;
         }
-        
+
         .related-section h3 {
             color: #495057;
             margin-bottom: 20px;
@@ -307,7 +333,7 @@ function tinh_kich_thuoc_file($duong_dan_file) {
             align-items: center;
             gap: 8px;
         }
-        
+
         .related-item {
             background: white;
             border: 1px solid #e9ecef;
@@ -317,13 +343,13 @@ function tinh_kich_thuoc_file($duong_dan_file) {
             transition: all 0.3s;
             cursor: pointer;
         }
-        
+
         .related-item:hover {
             border-color: #007bff;
             transform: translateX(3px);
-            box-shadow: 0 2px 8px rgba(0,123,255,0.15);
+            box-shadow: 0 2px 8px rgba(0, 123, 255, 0.15);
         }
-        
+
         .related-title {
             font-weight: 600;
             color: #333;
@@ -332,12 +358,61 @@ function tinh_kich_thuoc_file($duong_dan_file) {
             align-items: center;
             gap: 8px;
         }
-        
+
         .related-meta {
             font-size: 0.85em;
             color: #6c757d;
         }
-        
+
+        .reaction-box {
+            display: inline-flex;
+            align-items: center;
+            position: relative;
+            margin-top: 10px;
+            cursor: pointer;
+        }
+
+        .like-button {
+            padding: 5px 10px;
+            background: #eee;
+            border-radius: 20px;
+            transition: background 0.2s;
+        }
+
+        .like-button:hover {
+            background: #ddd;
+        }
+
+        .reaction-count {
+            margin-left: 8px;
+            font-weight: bold;
+            color: #444;
+        }
+
+        /* Popup cảm xúc */
+        .reaction-popup {
+            display: none;
+            position: absolute;
+            bottom: 40px;
+            left: 0;
+            background: #fff;
+            border-radius: 30px;
+            padding: 5px 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .reaction-popup .reaction {
+            font-size: 22px;
+            margin: 0 5px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+
+        .reaction-popup .reaction:hover {
+            transform: scale(1.3);
+        }
+
         .btn {
             padding: 10px 20px;
             border: none;
@@ -351,38 +426,38 @@ function tinh_kich_thuoc_file($duong_dan_file) {
             align-items: center;
             gap: 8px;
         }
-        
+
         .btn-primary {
             background: #007bff;
             color: white;
         }
-        
+
         .btn-primary:hover {
             background: #0056b3;
             transform: translateY(-1px);
-            box-shadow: 0 3px 10px rgba(0,123,255,0.3);
+            box-shadow: 0 3px 10px rgba(0, 123, 255, 0.3);
         }
-        
+
         .btn-success {
             background: #28a745;
             color: white;
         }
-        
+
         .btn-success:hover {
             background: #218838;
             transform: translateY(-1px);
-            box-shadow: 0 3px 10px rgba(40,167,69,0.3);
+            box-shadow: 0 3px 10px rgba(40, 167, 69, 0.3);
         }
-        
+
         .btn-secondary {
             background: #6c757d;
             color: white;
         }
-        
+
         .btn-secondary:hover {
             background: #5a6268;
         }
-        
+
         .loading-preview {
             display: flex;
             flex-direction: column;
@@ -391,7 +466,65 @@ function tinh_kich_thuoc_file($duong_dan_file) {
             height: 400px;
             color: #6c757d;
         }
-        
+
+        .comment-box {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            margin-top: 20px;
+            padding: 15px;
+            background: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+        }
+
+        .comment-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+        }
+
+        .comment-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .comment-input {
+            width: 100%;
+            min-height: 60px;
+            resize: vertical;
+            padding: 10px 12px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .comment-input:focus {
+            border-color: #007bff;
+        }
+
+        .comment-send {
+            align-self: flex-end;
+            margin-top: 8px;
+            padding: 8px 16px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background-color 0.3s;
+        }
+
+        .comment-send:hover {
+            background-color: #0056b3;
+        }
+
+
+
         .loading-spinner {
             width: 40px;
             height: 40px;
@@ -401,264 +534,195 @@ function tinh_kich_thuoc_file($duong_dan_file) {
             animation: spin 1s linear infinite;
             margin-bottom: 15px;
         }
-        
+
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
         }
-        
+
         @media (max-width: 1024px) {
             .main-content {
                 grid-template-columns: 1fr;
             }
-            
+
             .details-section {
                 border-top: 1px solid #dee2e6;
             }
         }
-        
+
         @media (max-width: 768px) {
             .header {
                 padding: 15px 20px;
             }
-            
+
             .header-title {
                 font-size: 1.2em;
             }
-            
+
             .preview-container {
                 padding: 15px;
             }
-            
+
             .details-content {
                 padding: 20px;
             }
-            
+
             .preview-iframe {
                 min-height: 400px;
             }
         }
+
+        .comment-list {
+            margin-top: 20px;
+        }
+
+        .comment-item {
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            transition: background-color 0.3s;
+        }
+
+        .comment-item:hover {
+            background-color: #f8f9fa;
+        }
+
+        .reaction-detail {
+            margin-top: 10px;
+            padding: 8px 0;
+            font-size: 14px;
+        }
+
+        .reaction-item {
+            display: inline-block;
+            margin-right: 15px;
+            padding: 4px 10px;
+            background: #f0f2f5;
+            border-radius: 12px;
+            font-size: 13px;
+        }
+
+        .reaction-count {
+            transition: transform 0.2s;
+        }
     </style>
 </head>
+
 <body>
-    <div class="container">
-        <div class="header">
-            <div class="breadcrumb">
-                
-                <a href="index.php?page=monhoc">Danh sách môn học</a> / 
-                <a href="index.php?page=tailieumon&id_mon_hoc=<?php echo $tai_lieu['id_mon_hoc']; ?>">
-                    <?php echo lam_sach_chuoi($tai_lieu['ten_mon']); ?>
-                </a> / 
-                Chi tiết tài liệu
-            </div>
-            <div class="header-title">
-                <a href="index.php?page=tailieumon&id_mon_hoc=<?php echo $tai_lieu['id_mon_hoc']; ?>" 
-                   class="back-btn">
-                    ← Quay lại
-                </a>
-                <?php echo lay_icon_file($tai_lieu['file_upload']); ?>
-                <?php echo lam_sach_chuoi($tai_lieu['tieu_de']); ?>
+<div class="container">
+
+    <div class="header" style="background:#2196F3;color:#fff;padding:20px;">
+        <div>
+            <a href="index.php?page=monhoc" style="color:white;">← Danh sách môn học</a> /
+            <?= htmlspecialchars($tai_lieu['ten_mon']) ?> /
+            <b>Chi tiết tài liệu</b>
+        </div>
+        <h2><?= lay_icon_file($tai_lieu['file_upload']) ?> <?= htmlspecialchars($tai_lieu['tieu_de']) ?></h2>
+    </div>
+
+    <div class="main-content" style="display:grid;grid-template-columns:1fr 350px;">
+        <div class="preview" style="padding:20px;">
+            <iframe src="<?= tao_url_preview($tai_lieu['file_upload']) ?>" style="width:100%;height:600px;border:1px solid #ccc;"></iframe>
+
+            <div style="margin-top:10px;">
+                <a href="<?= $tai_lieu['file_upload'] ?>" download class="btn btn-success">📥 Tải xuống</a>
+                <button onclick="copyLink()" class="btn btn-primary">📋 Copy link</button>
             </div>
         </div>
-        
-        <div class="main-content">
-            <div class="preview-section">
-                <div class="preview-header">
-                    <div class="preview-title">
-                        <?php echo lay_icon_file($tai_lieu['file_upload']); ?>
-                        Xem trước tài liệu
-                    </div>
-                    <div class="preview-meta">
-                        📅 <?php echo dinh_dang_ngay($tai_lieu['ngay_tao']); ?> |
-                        📎 <?php echo strtoupper(pathinfo($tai_lieu['file_upload'], PATHINFO_EXTENSION)); ?> |
-                        💾 <?php echo tinh_kich_thuoc_file($tai_lieu['file_upload']); ?>
-                    </div>
-                </div>
-                
-                <div class="preview-container">
-                    <div class="loading-preview" id="loading-preview">
-                        <div class="loading-spinner"></div>
-                        <p>Đang tải preview...</p>
-                    </div>
-                    
-                    <iframe id="preview-iframe" 
-                            class="preview-iframe" 
-                            src="<?php echo tao_url_preview($tai_lieu['file_upload']); ?>"
-                            style="display: none;"
-                            onload="hien_thi_preview()">
-                    </iframe>
-                    
-                    <div class="preview-actions">
-                        <a href="<?php echo $tai_lieu['file_upload']; ?>" 
-                           class="btn btn-success" 
-                           download 
-                           target="_blank">
-                            📥 Tải Xuống
-                        </a>
-                        <a href="<?php echo $tai_lieu['file_upload']; ?>" 
-                           class="btn btn-primary" 
-                           target="_blank">
-                            🔗 Mở File Gốc
-                        </a>
-                    </div>
-                </div>
+
+        <div class="details" style="padding:20px;">
+            <h3>📄 Thông tin</h3>
+            <p><b>Môn học:</b> <?= htmlspecialchars($tai_lieu['ten_mon']) ?></p>
+            <p><b>Người đăng:</b> <?= htmlspecialchars($tai_lieu['ten_nguoi_dang']) ?></p>
+            <p><b>Kích thước:</b> <?= tinh_kich_thuoc_file($tai_lieu['file_upload']) ?></p>
+            <p><b>Mô tả:</b> <?= nl2br(htmlspecialchars($tai_lieu['mo_ta'])) ?></p>
+
+            <h3 style="margin-top:30px;">💬 Bình luận</h3>
+
+            <!-- Form gửi bình luận -->
+            <div class="comment-box">
+                <img src="https://i.pravatar.cc/40?u=<?= $_SESSION['user_id'] ?? 'guest' ?>" class="comment-avatar">
+                <form id="commentForm" method="POST" action="src/Views/comment.php">
+                    <textarea name="noi_dung" class="comment-input" placeholder="Viết bình luận..." required></textarea>
+                    <input type="hidden" name="id_bai_chia_se" value="<?= $id_tai_lieu ?>">
+                    <button type="submit" class="comment-send">Gửi</button>
+                </form>
             </div>
-            
-            <div class="details-section">
-                <div class="details-content">
-                    <div class="info-card">
-                        <h3>📋 Thông tin cơ bản</h3>
-                        <div class="info-item">
-                            <span class="info-label">Tên file:</span>
-                            <span class="info-value">
-                                <?php echo basename($tai_lieu['file_upload']); ?>
-                            </span>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-label">Loại file:</span>
-                            <span class="info-value">
-                                <?php echo strtoupper(pathinfo($tai_lieu['file_upload'], PATHINFO_EXTENSION)); ?>
-                            </span>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-label">Kích thước:</span>
-                            <span class="info-value">
-                                <?php echo tinh_kich_thuoc_file($tai_lieu['file_upload']); ?>
-                            </span>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-label">Ngày upload:</span>
-                            <span class="info-value">
-                                <?php echo dinh_dang_ngay($tai_lieu['ngay_tao']); ?>
-                            </span>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-label">Môn học:</span>
-                            <span class="info-value">
-                                <?php echo lam_sach_chuoi($tai_lieu['ten_mon']); ?>
-                            </span>
-                        </div>
-                        <?php if (!empty($tai_lieu['ten_nguoi_dang'])): ?>
-                        <div class="info-item">
-                            <span class="info-label">Người đăng:</span>
-                            <span class="info-value">
-                                <?php echo lam_sach_chuoi($tai_lieu['ten_nguoi_dang']); ?>
-                            </span>
-                        </div>
-                        <?php endif; ?>
-                    </div>
-                    
-                    <?php if (!empty($tai_lieu['tom_tat'])): ?>
-                    <div class="description-section">
-                        <h3>📝 Tóm tắt</h3>
-                        <div class="description-text">
-                            <?php echo lam_sach_chuoi($tai_lieu['tom_tat']); ?>
-                        </div>
-                    </div>
-                    <?php endif; ?>
-                    
-                    <?php if (!empty($tai_lieu['mo_ta'])): ?>
-                    <div class="description-section">
-                        <h3>📖 Mô tả chi tiết</h3>
-                        <div class="description-text">
-                            <?php echo lam_sach_chuoi($tai_lieu['mo_ta']); ?>
-                        </div>
-                    </div>
-                    <?php endif; ?>
-                    
-                    <?php if (!empty($tai_lieu_lien_quan)): ?>
-                    <div class="related-section">
-                        <h3>🔗 Tài liệu liên quan</h3>
-                        <?php foreach ($tai_lieu_lien_quan as $lien_quan): ?>
-                        <div class="related-item" 
-                             onclick="window.location.href='index.php?page=chitiettailieu&id=<?php echo $lien_quan['id']; ?>'">
-                            <div class="related-title">
-                                <?php echo lay_icon_file($lien_quan['file_upload']); ?>
-                                <?php echo lam_sach_chuoi($lien_quan['tieu_de']); ?>
-                            </div>
-                            <div class="related-meta">
-                                📅 <?php echo dinh_dang_ngay($lien_quan['ngay_tao']); ?>
-                                <?php if (!empty($lien_quan['tom_tat'])): ?>
-                                    <br><?php echo substr(lam_sach_chuoi($lien_quan['tom_tat']), 0, 100); ?>...
-                                <?php endif; ?>
-                            </div>
-                        </div>
-                        <?php endforeach; ?>
-                    </div>
-                    <?php endif; ?>
-                </div>
+
+            <!-- Danh sách bình luận -->
+            <div class="comment-list" id="commentList" style="margin-top:15px;">
+                <p style="text-align:center;color:#777;">Đang tải bình luận...</p>
             </div>
         </div>
     </div>
-    
-    <script>
-        function hien_thi_preview() {
-            document.getElementById('loading-preview').style.display = 'none';
-            document.getElementById('preview-iframe').style.display = 'block';
-        }
-        
-        // Xử lý lỗi khi không thể load preview
-        document.getElementById('preview-iframe').addEventListener('error', function() {
-            document.getElementById('loading-preview').innerHTML = `
-                <div style="text-align: center; color: #dc3545;">
-                    <h4>❌ Không thể hiển thị preview</h4>
-                    <p>File có thể không hỗ trợ xem trước hoặc có vấn đề với kết nối.</p>
-                    <a href="<?php echo $tai_lieu['file_upload']; ?>" 
-                       class="btn btn-primary" 
-                       target="_blank">
-                        📄 Mở file trực tiếp
-                    </a>
-                </div>
-            `;
-        });
-        
-        // Thêm hiệu ứng loading cho buttons
-        document.querySelectorAll('.btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                if (this.textContent.includes('Tải Xuống')) {
-                    const originalText = this.innerHTML;
-                    this.innerHTML = '⬇️ Đang tải...';
-                    setTimeout(() => {
-                        this.innerHTML = '✅ Đã tải!';
-                    }, 1000);
-                    setTimeout(() => {
-                        this.innerHTML = originalText;
-                    }, 3000);
-                }
-            });
-        });
-        
-        // Auto-retry nếu preview không load được
-        setTimeout(() => {
-            const iframe = document.getElementById('preview-iframe');
-            const loading = document.getElementById('loading-preview');
-            
-            if (loading.style.display !== 'none') {
-                // Thử load lại với URL khác
-                iframe.src = '<?php echo $tai_lieu['file_upload']; ?>';
-                loading.innerHTML = `
-                    <div class="loading-spinner"></div>
-                    <p>Đang thử phương thức khác...</p>
-                `;
-                
-                // Nếu vẫn không được sau 10s thì hiển thị lỗi
-                setTimeout(() => {
-                    if (loading.style.display !== 'none') {
-                        loading.innerHTML = `
-                            <div style="text-align: center; color: #dc3545;">
-                                <h4>❌ Không thể hiển thị preview</h4>
-                                <p>Vui lòng tải file về để xem nội dung.</p>
-                                <a href="<?php echo $tai_lieu['file_upload']; ?>" 
-                                   class="btn btn-primary" 
-                                   download target="_blank">
-                                    📥 Tải file ngay
-                                </a>
-                            </div>
-                        `;
-                    }
-                }, 10000);
+</div>
+
+<script>
+// ======== Copy link ========
+function copyLink() {
+    const link = "http://" + window.location.host + "/index.php?page=chitiettailieu&id=<?= $id_tai_lieu ?>";
+    navigator.clipboard.writeText(link).then(() => alert("✅ Link đã copy: " + link));
+}
+
+// ======== Load comment ========
+const idBai = <?= $id_tai_lieu ?>;
+const commentList = document.getElementById('commentList');
+
+function loadComments() {
+    fetch('src/Views/comment.php?get_comments=1&id_bai=' + idBai)
+        .then(res => res.json())
+        .then(data => {
+            commentList.innerHTML = '';
+            if (data.success && data.comments.length) {
+                data.comments.forEach(c => {
+                    const div = document.createElement('div');
+                    div.className = 'comment-item';
+                    div.dataset.id = c.id;
+                    div.innerHTML = `<b>${c.ho_ten}</b>: ${c.noi_dung}<br><small>${c.ngay_tao}</small>
+                        ${c.can_delete ? `<a href="#" class="delete-comment" onclick="deleteComment(${c.id});return false;">🗑️ Xóa</a>` : ''}`;
+                    commentList.appendChild(div);
+                });
+            } else {
+                commentList.innerHTML = '<p style="text-align:center;color:#999;">Chưa có bình luận</p>';
             }
-        }, 8000);
-    </script>
+        });
+}
+loadComments();
+
+// ======== Gửi bình luận AJAX ========
+document.getElementById('commentForm').addEventListener('submit', e => {
+    e.preventDefault();
+    const noi_dung = e.target.noi_dung.value.trim();
+    if (!noi_dung) return alert('Nhập nội dung!');
+    fetch('src/Views/comment.php', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        body: 'ajax=1&id_bai_chia_se=' + idBai + '&noi_dung=' + encodeURIComponent(noi_dung)
+    }).then(res => res.json()).then(data => {
+        if (data.success) {
+            e.target.noi_dung.value = '';
+            loadComments();
+        } else alert(data.message);
+    });
+});
+
+// ======== Xóa bình luận ========
+function deleteComment(id) {
+    if (!confirm('Xóa bình luận này?')) return;
+    fetch('src/Views/comment.php', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        body: 'delete_ajax=1&id_comment=' + id
+    }).then(res => res.json()).then(data => {
+        if (data.success) loadComments();
+        else alert(data.message);
+    });
+}
+</script>
 </body>
 </html>

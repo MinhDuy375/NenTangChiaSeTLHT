@@ -13,7 +13,7 @@ $sql = "SELECT b.*, u.ten_dang_nhap, d.ten_danh_muc
         FROM bai_chia_se b
         LEFT JOIN nguoi_dung u ON b.id_nguoi_dung = u.id
         LEFT JOIN danh_muc d ON b.id_danh_muc = d.id
-        WHERE b.loai = 'du_an'";
+        WHERE b.loai = 'bai_viet'";
 
 $params = [];
 if (!empty($keyword)) {

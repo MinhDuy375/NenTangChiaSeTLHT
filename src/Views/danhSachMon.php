@@ -51,7 +51,7 @@ if (!function_exists('lam_sach_chuoi')) {
         position: relative;
         background: url('/NenTangChiaSeTLHT/public/docbackground.jpg') center/cover no-repeat;
         color: white;
-        padding: 60px 20px;
+        /* padding: 60px 20px; */
         text-align: center;
         overflow: hidden;
     }
@@ -90,7 +90,7 @@ if (!function_exists('lam_sach_chuoi')) {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
         gap: 20px;
-        padding: 40px 20px;
+        /* padding: 40px 20px; */
         background: #f8f9fa;
         max-width: 1200px;
         margin: -30px auto 0;
@@ -130,7 +130,7 @@ if (!function_exists('lam_sach_chuoi')) {
     }
 
     .content {
-        padding: 60px 20px 40px;
+        /* padding: 60px 20px 40px; */
         max-width: 1200px;
         margin: 0 auto;
     }

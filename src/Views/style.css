@@ -1,0 +1,140 @@
+/* Đặt lại một số mặc định */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: "Segoe UI", Roboto, Arial, sans-serif;
+}
+
+/* Toàn trang */
+body {
+  background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Khung tổng */
+.upload-container {
+  width: 100%;
+  max-width: 600px;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  animation: fadeIn 0.4s ease;
+}
+
+/* Phần tiêu đề */
+.hero-section {
+  background: #1976d2;
+  color: white;
+  padding: 24px;
+  text-align: center;
+}
+
+.hero-content h1 {
+  font-size: 1.6rem;
+  margin-bottom: 6px;
+}
+
+.hero-content p {
+  font-size: 0.95rem;
+  opacity: 0.9;
+}
+
+/* Phần form */
+.form-section {
+  padding: 24px;
+}
+
+.form-card {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.back-btn {
+  display: inline-block;
+  font-size: 0.9rem;
+  text-decoration: none;
+  color: #1976d2;
+  transition: 0.2s;
+}
+
+.back-btn:hover {
+  color: #0d47a1;
+  text-decoration: underline;
+}
+
+/* Thông báo */
+.thong-bao {
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: #e3f2fd;
+  color: #1565c0;
+  font-weight: 500;
+}
+
+/* Nhóm form */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+label {
+  font-weight: 600;
+  color: #333;
+}
+
+.required {
+  color: red;
+}
+
+input[type="text"],
+textarea {
+  padding: 10px 12px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  outline: none;
+  transition: 0.2s;
+  font-size: 0.95rem;
+}
+
+input[type="text"]:focus,
+textarea:focus {
+  border-color: #1976d2;
+  box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.2);
+}
+
+/* Nút lưu */
+.submit-btn {
+  width: 100%;
+  padding: 12px;
+  background: #1976d2;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.submit-btn:hover {
+  background: #0d47a1;
+}
+
+/* Hiệu ứng nhỏ */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

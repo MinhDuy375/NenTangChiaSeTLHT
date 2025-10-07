@@ -1,6 +1,9 @@
 <?php
 include __DIR__ . '/../../config/ketNoiDB.php';
+include __DIR__ . '/checkLogin.php'; // Thêm dòng này
 
+// Kiểm tra đăng nhập (bắt buộc)
+kiem_tra_dang_nhap(true);
 $thong_bao = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $ten_dm = trim($_POST['ten_danh_muc'] ?? '');
@@ -21,43 +24,49 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
-  <meta charset="UTF-8">
-  <title>Đăng tải danh mục</title>
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <title>Đăng tải danh mục</title>
+    <link rel="stylesheet" href="style.css">
 </head>
+<style>
+
+</style>
+
 <body>
-<div class="upload-container">
-    <div class="hero-section">
-        <div class="hero-content">
-            <h1>➕ Đăng Tải Danh Mục</h1>
-            <p>Tạo danh mục mới để sắp xếp tài liệu / nguồn</p>
+    <div class="upload-container">
+        <div class="hero-section">
+            <div class="hero-content">
+                <h1>➕ Đăng Tải Danh Mục</h1>
+                <p>Tạo danh mục mới để sắp xếp tài liệu / nguồn</p>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <div class="form-card">
+                <a href="index.php?page=source" class="back-btn">← Quay lại thư viện nguồn</a>
+
+                <?php if ($thong_bao): ?>
+                    <div class="thong-bao"><?php echo $thong_bao; ?></div>
+                <?php endif; ?>
+
+                <form method="POST">
+                    <div class="form-group">
+                        <label for="ten_danh_muc">Tên danh mục <span class="required">*</span></label>
+                        <input type="text" id="ten_danh_muc" name="ten_danh_muc" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="mo_ta">Mô tả</label>
+                        <textarea id="mo_ta" name="mo_ta"></textarea>
+                    </div>
+
+                    <button type="submit" class="submit-btn">💾 Lưu danh mục</button>
+                </form>
+            </div>
         </div>
     </div>
-
-    <div class="form-section">
-        <div class="form-card">
-            <a href="index.php?page=source" class="back-btn">← Quay lại thư viện nguồn</a>
-
-            <?php if ($thong_bao): ?>
-                <div class="thong-bao"><?php echo $thong_bao; ?></div>
-            <?php endif; ?>
-
-            <form method="POST">
-                <div class="form-group">
-                    <label for="ten_danh_muc">Tên danh mục <span class="required">*</span></label>
-                    <input type="text" id="ten_danh_muc" name="ten_danh_muc" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="mo_ta">Mô tả</label>
-                    <textarea id="mo_ta" name="mo_ta"></textarea>
-                </div>
-
-                <button type="submit" class="submit-btn">💾 Lưu danh mục</button>
-            </form>
-        </div>
-    </div>
-</div>
 </body>
+
 </html>

@@ -2,8 +2,7 @@
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
-require 'ketNoiDB.php'; // file này tạo kết nối PDO: $conn = new PDO(...)
-
+include __DIR__ . '/../../config/ketNoiDB.php';
 $message = '';
 
 if (!isset($_SESSION['otp_verified']) || $_SESSION['otp_verified'] !== true) {
@@ -62,5 +61,3 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </form>
     </div>
 </div>
-
-
