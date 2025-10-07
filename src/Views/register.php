@@ -20,7 +20,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username = trim($_POST['username'] ?? '');
     $name     = trim($_POST['name'] ?? '');
     $email    = trim($_POST['email'] ?? '');
-    $role     = $_POST['role'] ?? 'nguoi_dung';
+    $role     = 'nguoi_dung';
     $password = $_POST['password'] ?? '';
     $confirm_password = $_POST['confirm_password'] ?? '';
 
@@ -136,11 +136,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <input type="email" id="email" name="email" required
                 value="<?= htmlspecialchars($_POST['email'] ?? '') ?>">
 
-            <label for="role">Vai trò:</label>
-            <select id="role" name="role" required>
-                <option value="nguoi_dung" <?= ($_POST['role'] ?? '') == 'nguoi_dung' ? 'selected' : '' ?>>Người dùng</option>
-                <option value="khach" <?= ($_POST['role'] ?? '') == 'khach' ? 'selected' : '' ?>>Khách</option>
-            </select>
+
 
             <label for="password">Mật khẩu: <span style="color: red;">*</span></label>
             <input type="password" id="password" name="password" required minlength="6">

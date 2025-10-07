@@ -17,7 +17,7 @@ ob_start();
 // Route các trang
 switch ($page) {
     case 'home':
-        include "src/Views/trangChu.php";
+        include "src/Views/TrangChu.php";
         break;
     case 'monhoc':
         include "src/Views/danhSachMon.php";
@@ -71,7 +71,7 @@ switch ($page) {
         include "src/Views/dangTaiDanhMuc.php";
         break;
     case 'thu_vien':
-        include "src/Views/thuVienCaNhan.php";
+        include "src/Views/ThuVienCaNhan.php";
         break;
     default:
         echo "<div style='text-align: center; padding: 50px;'>";
