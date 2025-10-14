@@ -601,20 +601,18 @@ function tinh_kich_thuoc_file($duong_dan_file)
 
                                     <button class="btn-save <?php echo $da_luu ? 'saved' : ''; ?>"
                                         onclick="toggleSave(this, <?php echo $tai_lieu['id']; ?>)">
-                                        <?php echo $da_luu ? '✅ Đã lưu' : '💾 Lưu'; ?>
+                                        <?php echo $da_luu ? '💛 Yêu thích' : '🤍 Yêu thích'; ?>
                                     </button>
 
                                 </div>
                                 <div class="reaction-box" data-id="<?php echo $tai_lieu['id']; ?>">
-                                    <!-- Nút Like -->
-                                    <div class="like-button">
+                                    <!-- <div class="like-button">
                                         👍 <span class="like-text">Thích</span>
-                                    </div>
-
+                                    </div> -->
                                     <!-- Số lượt tương tác -->
-                                    <span class="reaction-count">
+                                    <!-- <span class="reaction-count">
                                         <?php echo lay_tong_reaction($pdo, $tai_lieu['id']); ?>
-                                    </span>
+                                    </span> -->
 
                                     <!-- Popup cảm xúc -->
                                     <!-- <div class="reaction-popup">
@@ -632,7 +630,7 @@ function tinh_kich_thuoc_file($duong_dan_file)
                                 $tong = $chiTiet ? array_sum($chiTiet) : 0;
                                 ?>
                                 <!-- Tách chi tiết reaction ra dưới -->
-                                <div class="reaction-detail">
+                                <!-- <div class="reaction-detail">
                                     <?php foreach ($chiTiet as $loai => $sl): ?>
                                         <?php if ($sl > 0): ?>
                                             <span class="reaction-item">
@@ -640,7 +638,7 @@ function tinh_kich_thuoc_file($duong_dan_file)
                                             </span>
                                         <?php endif; ?>
                                     <?php endforeach; ?>
-                                </div>
+                                </div> -->
 
 
 
@@ -826,10 +824,10 @@ function tinh_kich_thuoc_file($duong_dan_file)
             .then(data => {
                 if (data.status === "saved") {
                     btn.classList.add("saved");
-                    btn.innerHTML = "✅ Đã lưu";
+                    btn.innerHTML = "💛 Yêu thích";
                 } else if (data.status === "removed") {
                     btn.classList.remove("saved");
-                    btn.innerHTML = "💾 Lưu";
+                    btn.innerHTML = "🤍 Yêu thích";
                 } else {
                     alert("❌ " + data.message);
                 }

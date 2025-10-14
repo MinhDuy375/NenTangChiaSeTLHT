@@ -321,8 +321,8 @@ function tinh_kich_thuoc_file($duong_dan_file)
 <body>
     <div class="container">
         <div class="header">
-            <h1>📚 Thư viện của tôi</h1>
-            <p>Quản lý tài liệu đã lưu của bạn</p>
+            <h1>😻 Yêu thích</h1>
+            <p>Quản lý tài liệu yêu thích của bạn</p>
         </div>
 
         <div class="content">

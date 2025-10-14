@@ -666,17 +666,6 @@ function tinh_kich_thuoc_file($duong_dan_file)
 
         <div class="main-content">
             <div class="preview-section">
-                <div class="preview-header">
-                    <div class="preview-title">
-                        <?php echo lay_icon_file($tai_lieu['file_upload']); ?>
-                        Xem trước tài liệu
-                    </div>
-                    <div class="preview-meta">
-                        📅 <?php echo dinh_dang_ngay($tai_lieu['ngay_tao']); ?> |
-                        📎 <?php echo strtoupper(pathinfo($tai_lieu['file_upload'], PATHINFO_EXTENSION)); ?> |
-                        💾 <?php echo tinh_kich_thuoc_file($tai_lieu['file_upload']); ?>
-                    </div>
-                </div>
 
                 <div class="preview-container">
                     <div class="loading-preview" id="loading-preview">

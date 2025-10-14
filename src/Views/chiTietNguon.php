@@ -59,160 +59,18 @@ ob_start();
             background-color: #f8f9fa;
         }
 
-        /* Header styles - tương thích với layout.php */
-        /* .main-header { 
-            position: fixed;   
-            top: 0;            
-            left: 0;
-            right: 0;
-            z-index: 1000; 
-            background: linear-gradient(135deg, #007bff, #0056b3); 
-            color: white; 
-            padding: 0 20px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            height: 70px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        } */
 
-        /* .logo {
-            font-size: 24px;
-            font-weight: bold;
-            text-decoration: none;
-            color: white;
-            padding: 10px 10px;
-        }
-        
-        .logo:hover {
-            opacity: 0.9;
-        }
-        
-        .header-search-container {
-            flex: 1;
-            max-width: 300px;
-            margin: 0 30px;
-        }
-        
-        .header-search-box {
-            width: 100%;
-            height: 40px;
-            border: 2px solid rgba(255,255,255,0.3);
-            border-radius: 20px;
-            font-size: 14px;
-            transition: all 0.3s;
-            padding: 0 20px;
-            background: rgba(255,255,255,0.1);
-            color: white;
-        }
-        
-        .header-search-box::placeholder {
-            color: rgba(255,255,255,0.7);
-        }
-        
-        .header-search-box:focus {
-            outline: none;
-            background: rgba(255,255,255,0.2);
-            border-color: rgba(255,255,255,0.8);
-            box-shadow: 0 0 0 3px rgba(255,255,255,0.1);
-        }
-        
-        .nav-menu {
-            display: flex;
-            align-items: center;
-            gap: 25px;
-        }
-        
-        .nav-menu a { 
-            color: white; 
-            text-decoration: none; 
-            font-weight: 500;
-            padding: 8px 16px;
-            border-radius: 20px;
-            transition: all 0.3s;
-            white-space: nowrap;
-        }
-        
-        .nav-menu a:hover,
-        .nav-menu a.active {
-            background: rgba(255,255,255,0.2);
-            transform: translateY(-1px);
-        }
-        
-        .user-section {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            margin-left: 20px;
-        }
-        
-        .user-name {
-            font-weight: 500;
-            color: rgba(255,255,255,0.9);
-        }
-        
-        .user-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: #fff;
-            color: #007bff;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            font-size: 16px;
-            border: 2px solid rgba(255,255,255,0.3);
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        
-        .user-avatar:hover {
-            transform: scale(1.05);
-            border-color: #fff;
-        }
-        
-        .logout-btn {
-            background: rgba(255,77,79,0.9);
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 20px;
-            cursor: pointer;
-            transition: all 0.3s;
-            font-size: 14px;
-            font-weight: 500;
-        }
-        
-        .logout-btn:hover {
-            background: #ff4d4f;
-            transform: translateY(-1px);
-        } */
 
         main {
-
+            padding-top: 30px;
             min-height: calc(100vh - 130px);
             background-color: #f8f9fa;
-        }
-
-        footer {
-            background: #007bff;
-            color: white;
-            text-align: center;
-            padding: 20px;
-            margin-top: auto;
-        }
-
-        .footer-content {
-            max-width: 1200px;
-            margin: 0 auto;
         }
 
         /* Detail page specific styles */
         .detail-container {
             max-width: 800px;
             margin: 0 auto;
-            padding: 20px;
         }
 
         .back-button {
@@ -627,14 +485,6 @@ ob_start();
                 margin-top: 10px;
             }
 
-            main {
-                padding-top: 120px;
-            }
-
-            .detail-container {
-                padding: 15px;
-            }
-
             .post-header,
             .post-content,
             .post-stats,
@@ -676,8 +526,6 @@ ob_start();
 </head>
 
 <body>
-
-
     <main>
         <div class="detail-container">
             <?php if (!$item): ?>
@@ -685,7 +533,7 @@ ob_start();
                     <h3>❌ Không tìm thấy mã nguồn</h3>
                     <p>Bài viết có thể đã bị xóa hoặc không tồn tại.<br>
                         Vui lòng kiểm tra lại đường link hoặc quay về trang chủ.</p>
-                    <div style="margin-top: 20px;">
+                    <div>
                         <a href="index.php?page=source" style="background: #007bff; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; display: inline-block;">
                             ← Quay về Thư viện nguồn
                         </a>
@@ -833,15 +681,6 @@ ob_start();
             <?php endif; ?>
         </div>
     </main>
-
-    <footer>
-        <div class="footer-content">
-            <p>&copy; <?= date("Y") ?> Sharedy - Hệ thống chia sẻ tài liệu học tập</p>
-            <p style="margin-top: 5px; font-size: 14px; opacity: 0.8;">
-                Phát triển bởi nhóm sinh viên CNTT
-            </p>
-        </div>
-    </footer>
 
     <script>
         // Functionality for like/dislike buttons
