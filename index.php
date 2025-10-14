@@ -17,7 +17,7 @@ ob_start();
 // Route các trang
 switch ($page) {
     case 'home':
-        include "src/Views/trangChu.php";
+        include "src/Views/TrangChu.php";
         break;
     case 'monhoc':
         include "src/Views/danhSachMon.php";
@@ -71,7 +71,22 @@ switch ($page) {
         include "src/Views/dangTaiDanhMuc.php";
         break;
     case 'thu_vien':
-        include "src/Views/thuVienCaNhan.php";
+        include "src/Views/ThuVienCaNhan.php";
+        break;
+    case 'admin':
+        include "src/Views/admin_config/index.php";
+        break;
+    case 'adminMon':
+        include "src/Views/admin_config/mon_hoc.php";
+        break;
+    case 'adminBai':
+        include "src/Views/admin_config/bai_viet.php";
+        break;
+    case 'adminUser':
+        include "src/Views/admin_config/nguoi_dung.php";
+        break;
+    case 'adminDocs':
+        include "src/Views/admin_config/tai_lieu_mon.php";
         break;
     default:
         echo "<div style='text-align: center; padding: 50px;'>";
