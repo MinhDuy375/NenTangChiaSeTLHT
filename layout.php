@@ -405,6 +405,107 @@
     color: #ffcc00; /* Vàng nhạt khi hover */
     text-decoration: underline; /* Hoặc giữ none nếu không muốn gạch chân */
   }
+
+  .profile-container {
+    max-width: 800px;
+    margin: 20px auto;
+    background: #fff;
+    border-radius: 6px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    overflow: hidden;
+    font-family: Arial, sans-serif;
+}
+
+.profile-tabs {
+    display: flex;
+    background: #f5f5f5;
+    border-bottom: 1px solid #ddd;
+}
+
+.profile-tabs a {
+    flex: 1;
+    text-align: center;
+    padding: 12px 0;
+    text-decoration: none;
+    color: #333;
+    font-weight: bold;
+    transition: 0.2s;
+}
+
+.profile-tabs a:hover {
+    background: #eaeaea;
+}
+
+.profile-tabs a.active {
+    background: #fff;
+    border-bottom: 2px solid #007bff;
+    color: #007bff;
+}
+
+.profile-content {
+    padding: 20px;
+}
+
+.profile-info p {
+    margin: 10px 0;
+    padding: 8px;
+    border-bottom: 1px solid #eee;
+}
+
+.profile-form {
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+.profile-form label {
+    margin-top: 10px;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.profile-form input {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.profile-form button {
+    margin-top: 20px;
+    padding: 10px;
+    background: #007bff;
+    border: none;
+    color: white;
+    font-weight: bold;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.profile-form button:hover {
+    background: #0056b3;
+}
+.back-home {
+    text-align: center;
+    margin: 30px 0 10px 0;
+}
+
+.back-home a {
+    display: inline-block;
+    padding: 10px 20px;
+    background: #6c757d;
+    color: white;
+    border-radius: 4px;
+    text-decoration: none;
+    font-weight: bold;
+    transition: 0.2s;
+}
+
+.back-home a:hover {
+    background: #5a6268;
+}
+
+
    
         /* Responsive */
         @media (max-width: 768px) {
@@ -476,13 +577,26 @@
             
         </nav>
         
-        <div class="user-section">
-            <span class="user-name">Minh Duy</span>
-            <div class="user-avatar" title="Minh Duy">MD</div>
+     <div class="user-section">
+        <?php if (!empty($_SESSION['user_id'])): ?>
+            <?php 
+                $fullname = htmlspecialchars($_SESSION['fullname'] ?? $_SESSION['username']);
+                $avatar = strtoupper(substr($fullname, 0, 2));
+            ?>
+            <span class="user-name"><?= $fullname ?></span>
+
+          <a href="index.php?page=userinfo" class="user-avatar" title="<?= $fullname ?>">
+  <?= $avatar ?>
+           </a>
+
+            
             <form action="logout.php" method="post" style="margin:0;">
                 <button type="submit" class="logout-btn">Đăng xuất</button>
             </form>
-        </div>
+        <?php else: ?>
+          <a href="index.php?page=login" class="link-white-no-underline">Đăng nhập</a>
+        <?php endif; ?>
+    </div>
         
         
     </header>

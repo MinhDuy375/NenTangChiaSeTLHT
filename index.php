@@ -17,31 +17,31 @@ ob_start();
 // Route các trang
 switch ($page) {
     case 'home':
-        include "src/Views/trangChu.php";
+        include "TrangChu.php";
         break;
     case 'monhoc':
-        include "src/Views/danhSachMon.php";
+        include "danhSachMon.php";
         break;
     case 'tailieumon':
-        include "src/Views/taiLieuMon.php";
+        include "taiLieuMon.php";
         break;
     case 'chitiettailieu':
-        include "src/Views/chiTietTaiLieu.php";
+        include "chiTietTaiLieu.php";
         break;     
     case 'contact':
-        include "src/Views/lienHe.php";
+        include "lienHe.php";
         break;
     case 'upload':
-        include "src/Views/dangTaiTaiLieu.php";
+        include "dangTaiTaiLieu.php";
         break;
     case 'source':
-        include "src/Views/ThuVienNguon.php";
+        include "ThuVienNguon.php";
         break;
     case 'source_upload':
-        include "src/Views/dangTaiNguon.php";
+        include "dangTaiNguon.php";
         break;    
     case 'source_detail':
-        include "src/Views/chiTietNguon.php";
+        include "chiTietNguon.php";
         break;  
      case 'login':
         include "login.php";
@@ -63,6 +63,9 @@ switch ($page) {
         break;
     case 'forgotpass':
         include "forgotpass.php";
+        break;
+    case 'userinfo':
+        include "user_profile.php";
         break;
 
     default:
