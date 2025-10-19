@@ -5,16 +5,15 @@ include __DIR__ . '/../../config/ketNoiDB.php';
 // Lấy thống kê tổng quan
 try {
     $sql_thong_ke = "SELECT 
-                        COUNT(DISTINCT mh.id) as tong_mon_hoc,
-                        COUNT(bcs.id) as tong_tai_lieu,
-                        COUNT(DISTINCT bcs.id_nguoi_dung) as tong_nguoi_dung
-                     FROM mon_hoc mh
-                     LEFT JOIN bai_chia_se bcs ON mh.id = bcs.id_mon_hoc AND bcs.loai = 'tai_lieu'";
+                        (SELECT COUNT(*) FROM mon_hoc) as tong_mon_hoc,
+                        (SELECT COUNT(*) FROM bai_chia_se WHERE loai = 'tai_lieu') as tong_tai_lieu,
+                        (SELECT COUNT(*) FROM bai_chia_se WHERE loai = 'bai_viet') as tong_bai_viet,
+                        (SELECT COUNT(DISTINCT id) FROM nguoi_dung) as tong_nguoi_dung";
 
     $stmt_thong_ke = $pdo->query($sql_thong_ke);
     $thong_ke = $stmt_thong_ke->fetch(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
-    $thong_ke = array('tong_mon_hoc' => 0, 'tong_tai_lieu' => 0, 'tong_nguoi_dung' => 0);
+    $thong_ke = array('tong_mon_hoc' => 0, 'tong_tai_lieu' => 0, 'tong_bai_viet' => 0, 'tong_nguoi_dung' => 0);
 }
 
 // Lấy tài liệu mới nhất
@@ -478,18 +477,23 @@ try {
         <div class="stats-container">
             <div class="stat-card">
                 <div class="stat-icon">📖</div>
-                <div class="stat-number"><?php echo number_format($thong_ke['tong_mon_hoc'] ?? 0); ?></div>
+                <div class="stat-number"><?php echo number_format($thong_ke['tong_mon_hoc'] ?? 0); ?>+</div>
                 <div class="stat-label">Môn Học</div>
             </div>
             <div class="stat-card">
                 <div class="stat-icon">📄</div>
-                <div class="stat-number"><?php echo number_format($thong_ke['tong_tai_lieu'] ?? 0); ?></div>
-                <div class="stat-label">Tài Liệu</div>
+                <div class="stat-number"><?php echo number_format($thong_ke['tong_tai_lieu'] ?? 0); ?>+</div>
+                <div class="stat-label">Tài Liệu chuyên môn</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">📖</div>
+                <div class="stat-number"><?php echo number_format($thong_ke['tong_bai_viet'] ?? 0); ?>+</div>
+                <div class="stat-label">Bài chia sẻ</div>
             </div>
             <div class="stat-card">
                 <div class="stat-icon">👥</div>
-                <div class="stat-number"><?php echo number_format($thong_ke['tong_nguoi_dung'] ?? 0); ?></div>
-                <div class="stat-label">Thành Viên</div>
+                <div class="stat-number"><?php echo number_format($thong_ke['tong_nguoi_dung'] ?? 0); ?>+</div>
+                <div class="stat-label">Thành Viên cộng đồng</div>
             </div>
         </div>
     </div>

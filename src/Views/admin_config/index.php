@@ -115,16 +115,16 @@ include __DIR__ . '/../../../config/ketNoiDB.php';
         <div class="menu-grid">
             <div class="menu-card subjects">
                 <div class="icon">📚</div>
-                <h2>Quản Lý Môn Học</h2>
+                <h2>Quản Lý Môn Học - Tài liệu</h2>
                 <p>Xem danh sách môn học và tài liệu liên quan. Thêm, sửa, xóa môn học và quản lý tài liệu theo từng môn.</p>
                 <a href="index.php?page=adminMon">Vào Quản Lý</a>
             </div>
 
             <div class="menu-card articles">
                 <div class="icon">📝</div>
-                <h2>Quản Lý Bài Viết</h2>
+                <h2>Quản Lý Danh mục - Bài Viết</h2>
                 <p>Quản lý các bài viết chia sẻ. Lọc theo danh mục, tìm kiếm và thực hiện các thao tác CRUD.</p>
-                <a href="index.php?page=adminBai">Vào Quản Lý</a>
+                <a href="index.php?page=adminDanhmuc">Vào Quản Lý</a>
             </div>
 
             <div class="menu-card users">

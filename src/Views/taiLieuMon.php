@@ -224,7 +224,7 @@ function tinh_kich_thuoc_file($duong_dan_file)
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            min-height: 360px;
+            max-height: 360px;
             transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
 
@@ -490,7 +490,7 @@ function tinh_kich_thuoc_file($duong_dan_file)
                     <a href="index.php?page=monhoc">Danh sách môn học</a> /
                     <?php echo lam_sach_chuoi($thong_tin_mon_hoc['ten_mon']); ?>
                 </div>
-                <h1>📚 <?php echo lam_sach_chuoi($thong_tin_mon_hoc['ten_mon']); ?></h1>
+                <h1><?php echo lam_sach_chuoi($thong_tin_mon_hoc['ten_mon']); ?></h1>
                 <p>
                     <?php
                     if (!empty($thong_tin_mon_hoc['mo_ta'])) {
@@ -544,9 +544,6 @@ function tinh_kich_thuoc_file($duong_dan_file)
                             data-title="<?php echo strtolower(lam_sach_chuoi($tai_lieu['tieu_de'])); ?>"
                             data-date="<?php echo $tai_lieu['ngay_tao']; ?>">
                             <div class="tai-lieu-header">
-                                <span class="file-icon">
-                                    <?php echo lay_icon_file($tai_lieu['file_upload']); ?>
-                                </span>
                                 <div class="tai-lieu-title">
                                     <?php echo lam_sach_chuoi($tai_lieu['tieu_de']); ?>
                                 </div>
@@ -585,9 +582,6 @@ function tinh_kich_thuoc_file($duong_dan_file)
                                         📥 Tải Xuống
                                     </a>
 
-
-
-
                                     <?php
                                     // Kiểm tra bài đã lưu chưa
                                     $sql = "SELECT 1 FROM thu_vien_ca_nhan WHERE id_nguoi_dung = :user AND id_bai_chia_se = :post";
@@ -603,244 +597,202 @@ function tinh_kich_thuoc_file($duong_dan_file)
                                         onclick="toggleSave(this, <?php echo $tai_lieu['id']; ?>)">
                                         <?php echo $da_luu ? '💛 Yêu thích' : '🤍 Yêu thích'; ?>
                                     </button>
-
                                 </div>
-                                <div class="reaction-box" data-id="<?php echo $tai_lieu['id']; ?>">
-                                    <!-- <div class="like-button">
-                                        👍 <span class="like-text">Thích</span>
-                                    </div> -->
-                                    <!-- Số lượt tương tác -->
-                                    <!-- <span class="reaction-count">
-                                        <?php echo lay_tong_reaction($pdo, $tai_lieu['id']); ?>
-                                    </span> -->
-
-                                    <!-- Popup cảm xúc -->
-                                    <!-- <div class="reaction-popup">
-                                        <span class="reaction" data-type="like">👍</span>
-                                        <span class="reaction" data-type="love">❤️</span>
-                                        <span class="reaction" data-type="haha">😆</span>
-                                        <span class="reaction" data-type="wow">😮</span>
-                                        <span class="reaction" data-type="sad">😢</span>
-                                        <span class="reaction" data-type="angry">😡</span>
-                                    </div> -->
-                                </div> <!-- Kết thúc .reaction-box -->
-                                <?php
-                                // Lấy chi tiết reaction cho tài liệu hiện tại
-                                $chiTiet = lay_chi_tiet_reaction($pdo, $tai_lieu['id']);
-                                $tong = $chiTiet ? array_sum($chiTiet) : 0;
-                                ?>
-                                <!-- Tách chi tiết reaction ra dưới -->
-                                <!-- <div class="reaction-detail">
-                                    <?php foreach ($chiTiet as $loai => $sl): ?>
-                                        <?php if ($sl > 0): ?>
-                                            <span class="reaction-item">
-                                                <?= htmlspecialchars($loai) ?>: <?= $sl ?>
-                                            </span>
-                                        <?php endif; ?>
-                                    <?php endforeach; ?>
-                                </div> -->
-
-
-
                             </div>
                         </div>
-
-
+                    <?php endforeach; ?>
                 </div>
+
+                <div id="no-results" class="no-results" style="display: none;">
+                    <h3>🔍 Không tìm thấy kết quả</h3>
+                    <p>Không có tài liệu nào phù hợp với từ khóa tìm kiếm.</p>
+                </div>
+            <?php endif; ?>
         </div>
-    <?php endforeach; ?>
     </div>
 
-    <div id="no-results" class="no-results" style="display: none;">
-        <h3>🔍 Không tìm thấy kết quả</h3>
-        <p>Không có tài liệu nào phù hợp với từ khóa tìm kiếm.</p>
-    </div>
-<?php endif; ?>
-</div>
-</div>
+    <script>
+        function tim_kiem_tai_lieu() {
+            const searchInput = document.getElementById('search-input');
+            const searchTerm = searchInput.value.toLowerCase().trim();
+            const taiLieuCards = document.querySelectorAll('.tai-lieu-card');
+            const noResults = document.getElementById('no-results');
+            let hasResults = false;
 
-<script>
-    function tim_kiem_tai_lieu() {
-        const searchInput = document.getElementById('search-input');
-        const searchTerm = searchInput.value.toLowerCase().trim();
-        const taiLieuCards = document.querySelectorAll('.tai-lieu-card');
-        const noResults = document.getElementById('no-results');
-        let hasResults = false;
+            taiLieuCards.forEach(card => {
+                const title = card.getAttribute('data-title');
+                const shouldShow = title.includes(searchTerm);
 
-        taiLieuCards.forEach(card => {
-            const title = card.getAttribute('data-title');
-            const shouldShow = title.includes(searchTerm);
-
-            if (shouldShow) {
-                card.style.display = 'block';
-                hasResults = true;
-            } else {
-                card.style.display = 'none';
-            }
-        });
-
-        if (hasResults || searchTerm.length === 0) {
-            noResults.style.display = 'none';
-        } else {
-            noResults.style.display = 'block';
-        }
-    }
-
-    function sap_xep_tai_lieu() {
-        const container = document.getElementById('tai-lieu-container');
-        const cards = Array.from(container.querySelectorAll('.tai-lieu-card'));
-        const sortType = document.getElementById('sort-select').value;
-
-        cards.sort((a, b) => {
-            switch (sortType) {
-                case 'moi-nhat':
-                    return new Date(b.getAttribute('data-date')) - new Date(a.getAttribute('data-date'));
-                case 'cu-nhat':
-                    return new Date(a.getAttribute('data-date')) - new Date(b.getAttribute('data-date'));
-                case 'ten-a-z':
-                    return a.getAttribute('data-title').localeCompare(b.getAttribute('data-title'));
-                case 'ten-z-a':
-                    return b.getAttribute('data-title').localeCompare(a.getAttribute('data-title'));
-                default:
-                    return 0;
-            }
-        });
-
-        // Xóa tất cả cards và thêm lại theo thứ tự mới
-        cards.forEach(card => container.removeChild(card));
-        cards.forEach(card => container.appendChild(card));
-
-        // Thêm hiệu ứng
-        cards.forEach((card, index) => {
-            card.style.opacity = '0';
-            card.style.transform = 'translateY(20px)';
-            setTimeout(() => {
-                card.style.transition = 'all 0.3s ease';
-                card.style.opacity = '1';
-                card.style.transform = 'translateY(0)';
-            }, index * 50);
-        });
-    }
-
-    // Event listeners
-    document.getElementById('search-input').addEventListener('keyup', tim_kiem_tai_lieu);
-
-    // Thêm hiệu ứng loading cho các buttons
-    document.querySelectorAll('.btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            if (this.textContent.includes('Xem Chi Tiết')) {
-                this.innerHTML = '⏳ Đang tải...';
-            } else if (this.textContent.includes('Tải Xuống')) {
-                this.innerHTML = '⬇️ Đang tải...';
-                setTimeout(() => {
-                    this.innerHTML = '✅ Đã tải!';
-                }, 1000);
-                setTimeout(() => {
-                    this.innerHTML = '📥 Tải Xuống';
-                }, 3000);
-            }
-        });
-    });
-
-    // Animate cards on load
-    document.addEventListener('DOMContentLoaded', function() {
-        const cards = document.querySelectorAll('.tai-lieu-card');
-        cards.forEach((card, index) => {
-            card.style.opacity = '0';
-            card.style.transform = 'translateY(30px)';
-            setTimeout(() => {
-                card.style.transition = 'all 0.5s ease';
-                card.style.opacity = '1';
-                card.style.transform = 'translateY(0)';
-            }, index * 100);
-        });
-    });
-
-    // Auto focus search
-    document.getElementById('search-input')?.focus();
-
-
-    document.querySelectorAll(".reaction-box").forEach(box => {
-        let timeout;
-
-        const likeBtn = box.querySelector(".like-button");
-        const popup = box.querySelector(".reaction-popup");
-
-        // Hover lâu thì hiện popup
-        likeBtn.addEventListener("mouseenter", () => {
-            timeout = setTimeout(() => {
-                popup.style.display = "flex";
-            }, 500); // giữ 0.5s mới hiện
-        });
-
-        likeBtn.addEventListener("mouseleave", () => {
-            clearTimeout(timeout);
-        });
-
-        // Rời khỏi popup thì ẩn
-        popup.addEventListener("mouseleave", () => {
-            popup.style.display = "none";
-        });
-
-        // Khi chọn 1 reaction
-        popup.querySelectorAll(".reaction").forEach(r => {
-            r.addEventListener("click", () => {
-                let type = r.dataset.type;
-                let postId = box.dataset.id;
-
-                // Gửi AJAX lưu vào DB
-                fetch("/BTL/ajax_reaction.php", {
-                        method: "POST",
-                        credentials: "same-origin",
-                        headers: {
-                            "Content-Type": "application/x-www-form-urlencoded"
-                        },
-                        body: "id_bai=" + postId + "&type=" + type,
-                    })
-                    .then(res => res.json())
-                    .then(data => {
-                        if (data.success) {
-                            box.querySelector(".reaction-count").textContent = data.tong;
-                            popup.style.display = "none";
-                        }
-                    })
-                    .catch(err => console.error(err));
-            });
-        });
-    });
-
-
-    function toggleSave(btn, postId) {
-        btn.disabled = true; // Ngăn spam click nhanh
-
-        fetch("src/Views/save_post.php", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/x-www-form-urlencoded"
-                },
-                body: "post_id=" + postId
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.status === "saved") {
-                    btn.classList.add("saved");
-                    btn.innerHTML = "💛 Yêu thích";
-                } else if (data.status === "removed") {
-                    btn.classList.remove("saved");
-                    btn.innerHTML = "🤍 Yêu thích";
+                if (shouldShow) {
+                    card.style.display = 'block';
+                    hasResults = true;
                 } else {
-                    alert("❌ " + data.message);
+                    card.style.display = 'none';
                 }
-            })
-            .catch(err => {
-                console.error(err);
-                alert("⚠️ Không kết nối được server");
-            })
-            .finally(() => {
-                btn.disabled = false; // Mở lại nút sau khi xử lý xong
             });
-    }
-</script>
+
+            if (hasResults || searchTerm.length === 0) {
+                noResults.style.display = 'none';
+            } else {
+                noResults.style.display = 'block';
+            }
+        }
+
+        function sap_xep_tai_lieu() {
+            const container = document.getElementById('tai-lieu-container');
+            const cards = Array.from(container.querySelectorAll('.tai-lieu-card'));
+            const sortType = document.getElementById('sort-select').value;
+
+            cards.sort((a, b) => {
+                switch (sortType) {
+                    case 'moi-nhat':
+                        return new Date(b.getAttribute('data-date')) - new Date(a.getAttribute('data-date'));
+                    case 'cu-nhat':
+                        return new Date(a.getAttribute('data-date')) - new Date(b.getAttribute('data-date'));
+                    case 'ten-a-z':
+                        return a.getAttribute('data-title').localeCompare(b.getAttribute('data-title'));
+                    case 'ten-z-a':
+                        return b.getAttribute('data-title').localeCompare(a.getAttribute('data-title'));
+                    default:
+                        return 0;
+                }
+            });
+
+            // Xóa tất cả cards và thêm lại theo thứ tự mới
+            cards.forEach(card => container.removeChild(card));
+            cards.forEach(card => container.appendChild(card));
+
+            // Thêm hiệu ứng
+            cards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                setTimeout(() => {
+                    card.style.transition = 'all 0.3s ease';
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, index * 50);
+            });
+        }
+
+        // Event listeners
+        document.getElementById('search-input').addEventListener('keyup', tim_kiem_tai_lieu);
+
+        // Thêm hiệu ứng loading cho các buttons
+        document.querySelectorAll('.btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                if (this.textContent.includes('Xem Chi Tiết')) {
+                    this.innerHTML = '⏳ Đang tải...';
+                } else if (this.textContent.includes('Tải Xuống')) {
+                    this.innerHTML = '⬇️ Đang tải...';
+                    setTimeout(() => {
+                        this.innerHTML = '✅ Đã tải!';
+                    }, 1000);
+                    setTimeout(() => {
+                        this.innerHTML = '📥 Tải Xuống';
+                    }, 3000);
+                }
+            });
+        });
+
+        // Animate cards on load
+        document.addEventListener('DOMContentLoaded', function() {
+            const cards = document.querySelectorAll('.tai-lieu-card');
+            cards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(30px)';
+                setTimeout(() => {
+                    card.style.transition = 'all 0.5s ease';
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, index * 100);
+            });
+        });
+
+        // Auto focus search
+        document.getElementById('search-input')?.focus();
+
+
+        document.querySelectorAll(".reaction-box").forEach(box => {
+            let timeout;
+
+            const likeBtn = box.querySelector(".like-button");
+            const popup = box.querySelector(".reaction-popup");
+
+            // Hover lâu thì hiện popup
+            likeBtn.addEventListener("mouseenter", () => {
+                timeout = setTimeout(() => {
+                    popup.style.display = "flex";
+                }, 500); // giữ 0.5s mới hiện
+            });
+
+            likeBtn.addEventListener("mouseleave", () => {
+                clearTimeout(timeout);
+            });
+
+            // Rời khỏi popup thì ẩn
+            popup.addEventListener("mouseleave", () => {
+                popup.style.display = "none";
+            });
+
+            // Khi chọn 1 reaction
+            popup.querySelectorAll(".reaction").forEach(r => {
+                r.addEventListener("click", () => {
+                    let type = r.dataset.type;
+                    let postId = box.dataset.id;
+
+                    // Gửi AJAX lưu vào DB
+                    fetch("/BTL/ajax_reaction.php", {
+                            method: "POST",
+                            credentials: "same-origin",
+                            headers: {
+                                "Content-Type": "application/x-www-form-urlencoded"
+                            },
+                            body: "id_bai=" + postId + "&type=" + type,
+                        })
+                        .then(res => res.json())
+                        .then(data => {
+                            if (data.success) {
+                                box.querySelector(".reaction-count").textContent = data.tong;
+                                popup.style.display = "none";
+                            }
+                        })
+                        .catch(err => console.error(err));
+                });
+            });
+        });
+
+
+        function toggleSave(btn, postId) {
+            btn.disabled = true; // Ngăn spam click nhanh
+
+            fetch("src/Views/save_post.php", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/x-www-form-urlencoded"
+                    },
+                    body: "post_id=" + postId
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === "saved") {
+                        btn.classList.add("saved");
+                        btn.innerHTML = "💛 Yêu thích";
+                    } else if (data.status === "removed") {
+                        btn.classList.remove("saved");
+                        btn.innerHTML = "🤍 Yêu thích";
+                    } else {
+                        alert("❌ " + data.message);
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    alert("⚠️ Không kết nối được server");
+                })
+                .finally(() => {
+                    btn.disabled = false; // Mở lại nút sau khi xử lý xong
+                });
+        }
+    </script>
 </body>
 
 </html>

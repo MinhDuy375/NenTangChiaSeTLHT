@@ -55,7 +55,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['dang_tai_nguon'])) {
     <meta charset="UTF-8">
     <title>Đăng tải mã nguồn</title>
     <style>
-        /* ==================== CSS ĐỒNG BỘ VỚI TRANG ĐĂNG TẢI MÔN HỌC ==================== */
         .upload-container {
             background: white;
             min-height: calc(100vh - 70px);

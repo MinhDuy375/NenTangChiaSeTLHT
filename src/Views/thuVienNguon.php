@@ -1,21 +1,36 @@
 <?php
 // src/Views/thuVienNguon.php
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+$userId = isset($_SESSION['user_id']) ? (int)$_SESSION['user_id'] : 0;
+$isLoggedIn = $userId > 0;
+
+$isAdmin = $isLoggedIn
+    && isset($_SESSION['nguoi_dung']['vai_tro'])
+    && $_SESSION['nguoi_dung']['vai_tro'] === 'quan_tri_vien';
+
 include __DIR__ . '/../../config/ketNoiDB.php';
 
-// Lấy danh mục
 $danh_muc = $pdo->query("SELECT * FROM danh_muc ORDER BY ten_danh_muc")->fetchAll();
 
-// Lọc dữ liệu
 $keyword = $_GET['keyword'] ?? '';
 $id_danh_muc = $_GET['id_danh_muc'] ?? '';
 
-$sql = "SELECT b.*, u.ten_dang_nhap, d.ten_danh_muc
+
+$sql = "SELECT 
+            b.*, 
+            u.ten_dang_nhap, 
+            d.ten_danh_muc,
+            (SELECT COUNT(*) FROM reaction r WHERE r.id_bai_chia_se = b.id) as tong_so_reaction,
+            EXISTS(SELECT 1 FROM thu_vien_ca_nhan tv WHERE tv.id_bai_chia_se = b.id AND tv.id_nguoi_dung = :uid) as da_luu
         FROM bai_chia_se b
         LEFT JOIN nguoi_dung u ON b.id_nguoi_dung = u.id
         LEFT JOIN danh_muc d ON b.id_danh_muc = d.id
         WHERE b.loai = 'bai_viet'";
 
-$params = [];
+$params = [':uid' => $userId];
 if (!empty($keyword)) {
     $sql .= " AND (b.tieu_de LIKE :kw OR b.mo_ta LIKE :kw OR b.cong_nghe LIKE :kw)";
     $params[':kw'] = "%$keyword%";
@@ -29,15 +44,12 @@ $sql .= " ORDER BY b.ngay_tao DESC";
 $stmt = $pdo->prepare($sql);
 $stmt->execute($params);
 $ds_ma_nguon = $stmt->fetchAll();
-
-// Thiết lập title cho trang
 $title = "Thư viện nguồn - Sharedy";
-
-// Bắt đầu buffer để capture nội dung
 ob_start();
 ?>
 
 <style>
+    /* CSS cũ của bạn giữ nguyên... */
     .library-container {
         max-width: 1200px;
         margin: 0 auto;
@@ -78,9 +90,9 @@ ob_start();
 
     .search-form {
         display: flex;
+        flex-wrap: wrap;
         gap: 15px;
         align-items: end;
-        flex-wrap: wrap;
     }
 
     .search-group {
@@ -115,25 +127,32 @@ ob_start();
         box-shadow: 0 0 0 4px rgba(0, 123, 255, 0.1);
     }
 
-    .search-buttons {
-        display: flex;
+    .action-bar {
+        display: grid;
         gap: 10px;
-        align-items: end;
+        margin-top: 15px;
+        --btn-cols: 3;
+        grid-template-columns: repeat(var(--btn-cols), 1fr);
+    }
+
+    .action-bar.is-guest {
+        --btn-cols: 2;
     }
 
     .btn {
-        padding: 12px 24px;
+        padding: 12px 20px;
         border: none;
-        border-radius: 12px;
+        border-radius: 10px;
         font-size: 15px;
         font-weight: 600;
         cursor: pointer;
-        transition: all 0.3s ease;
         text-decoration: none;
+        text-align: center;
         display: inline-flex;
+        justify-content: center;
         align-items: center;
-        gap: 8px;
-        white-space: nowrap;
+        gap: 6px;
+        transition: all 0.3s ease;
     }
 
     .btn-primary {
@@ -141,19 +160,14 @@ ob_start();
         color: white;
     }
 
-    .btn-primary:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 25px rgba(0, 123, 255, 0.3);
-    }
-
     .btn-success {
         background: linear-gradient(135deg, #28a745, #1e7e34);
         color: white;
     }
 
-    .btn-success:hover {
+    .btn:hover {
         transform: translateY(-2px);
-        box-shadow: 0 8px 25px rgba(40, 167, 69, 0.3);
+        opacity: 0.95;
     }
 
     .posts-grid {
@@ -163,24 +177,14 @@ ob_start();
     }
 
     .post-card {
+        display: flex;
+        flex-direction: column;
         background: white;
         border-radius: 16px;
         padding: 25px;
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
         transition: all 0.3s ease;
         border: 1px solid #f0f0f0;
-        position: relative;
-        overflow: hidden;
-    }
-
-    .post-card::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 4px;
-        background: linear-gradient(90deg, #667eea, #764ba2);
     }
 
     .post-card:hover {
@@ -193,8 +197,6 @@ ob_start();
         align-items: center;
         gap: 15px;
         margin-bottom: 20px;
-        padding-bottom: 15px;
-        border-bottom: 1px solid #f5f5f5;
     }
 
     .avatar {
@@ -208,13 +210,11 @@ ob_start();
         color: white;
         font-weight: bold;
         font-size: 18px;
-        flex-shrink: 0;
     }
 
     .post-info h4 {
         margin: 0;
         color: #333;
-        font-size: 16px;
         font-weight: 600;
     }
 
@@ -222,7 +222,6 @@ ob_start();
         display: flex;
         align-items: center;
         gap: 10px;
-        margin-top: 5px;
         font-size: 13px;
         color: #666;
     }
@@ -242,216 +241,154 @@ ob_start();
         color: #333;
         margin-bottom: 15px;
         line-height: 1.4;
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
     }
 
     .post-description {
         color: #666;
         line-height: 1.6;
         margin-bottom: 20px;
-        display: -webkit-box;
-        -webkit-line-clamp: 3;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
+        flex-grow: 1;
+        /* Giúp đẩy footer xuống */
     }
 
-    .tech-badge {
+    .post-footer {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+        /* Cho phép xuống dòng nếu không đủ chỗ */
+    }
+
+    .tech-badge,
+    .reaction-stat {
         display: inline-block;
-        background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+        background: #f8f9fa;
         color: #495057;
         padding: 6px 15px;
         border-radius: 20px;
         font-size: 13px;
         font-weight: 600;
-        margin-bottom: 20px;
     }
 
+    /* ==================================================================== */
+    /* CSS MỚI: Cho các nút hành động và nút lưu */
+    /* ==================================================================== */
     .post-actions {
         display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding-top: 20px;
-        border-top: 1px solid #f5f5f5;
+        gap: 10px;
+        margin-top: auto;
     }
 
-    .action-buttons {
-        display: flex;
-        gap: 15px;
+    .post-actions .btn-detail {
+        flex-grow: 1;
     }
 
-    .action-btn {
-        background: none;
+    .save-button {
+        flex-shrink: 0;
+        padding: 10px;
+        width: 44px;
+        height: 44px;
+        background: #f0f2f5;
+        color: #65676b;
         border: none;
-        color: #666;
-        font-size: 14px;
+        border-radius: 10px;
         cursor: pointer;
-        padding: 8px 12px;
-        border-radius: 8px;
-        transition: all 0.3s;
+        transition: all 0.2s ease;
         display: flex;
         align-items: center;
-        gap: 6px;
-        font-weight: 500;
+        justify-content: center;
+        font-size: 18px;
     }
 
-    .action-btn:hover {
-        background: #f0f0f0;
-        color: #333;
+    /* --- LOGIC ẨN/HIỆN ICON --- */
+
+    .save-button .icon-solid {
+        display: none;
     }
 
-    .action-btn.liked {
-        color: #e74c3c;
-        background: #fdf2f2;
+    .save-button .icon-regular {
+        display: inline-block;
     }
 
-    .view-detail-btn {
-        background: linear-gradient(135deg, #007bff, #0056b3);
-        color: white;
-        padding: 10px 20px;
-        text-decoration: none;
-        border-radius: 10px;
-        font-size: 14px;
-        font-weight: 600;
-        transition: all 0.3s;
+    .save-button.active {
+        background: #ffb3b3ff;
+        color: #fa383e;
     }
 
-    .view-detail-btn:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 6px 20px rgba(0, 123, 255, 0.3);
+    .save-button.active .icon-solid {
+        display: inline-block;
     }
 
-    .empty-state {
-        text-align: center;
-        padding: 80px 20px;
-        background: white;
-        border-radius: 16px;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    .save-button.active .icon-regular {
+        display: none;
     }
 
-    .empty-state h3 {
-        font-size: 24px;
-        color: #666;
-        margin-bottom: 15px;
-    }
-
-    .empty-state p {
-        color: #888;
-        font-size: 16px;
-        margin-bottom: 30px;
-        line-height: 1.6;
-    }
-
+    /* Responsive */
     @media (max-width: 768px) {
-        .library-container {
-            padding: 15px;
-        }
-
-        .library-header {
-            padding: 25px 20px;
-            margin-bottom: 20px;
-        }
-
-        .library-header h2 {
-            font-size: 2em;
-        }
-
         .search-form {
             flex-direction: column;
-            gap: 20px;
+            gap: 10px;
         }
 
-        .search-buttons {
-            justify-content: center;
+        .action-bar {
+            grid-template-columns: repeat(var(--btn-cols), 1fr);
         }
 
         .posts-grid {
             grid-template-columns: 1fr;
-            gap: 20px;
-        }
-
-        .post-card {
-            padding: 20px;
-        }
-
-        .post-actions {
-            flex-direction: column;
-            gap: 15px;
-            align-items: stretch;
-        }
-
-        .view-detail-btn {
-            text-align: center;
         }
     }
 </style>
 
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thư viện nguồn - Sharedy</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+</head>
+
 <div class="library-container">
     <div class="library-header">
         <h2>🔧 Thư Viện Nguồn</h2>
-        <p>Nơi chia sẻ các dự án, mã nguồn hữu ích cho sinh viên & người mới học lập trình. Khám phá, học hỏi và đóng góp cho cộng đồng!</p>
+        <p>Nơi chia sẻ các dự án, mã nguồn hữu ích cho sinh viên & người mới học lập trình.</p>
     </div>
 
     <div class="search-section">
         <form method="get" action="index.php" class="search-form">
             <input type="hidden" name="page" value="source">
-
             <div class="search-group">
                 <label for="keyword">🔍 Từ khóa tìm kiếm</label>
-                <input type="text"
-                    id="keyword"
-                    name="keyword"
-                    placeholder="Nhập tên dự án, công nghệ, mô tả..."
-                    value="<?= htmlspecialchars($keyword) ?>"
-                    class="search-input">
+                <input type="text" id="keyword" name="keyword" placeholder="Nhập tên dự án, công nghệ, mô tả..." value="<?= htmlspecialchars($keyword) ?>" class="search-input">
             </div>
-
             <div class="search-group">
                 <label for="category">📂 Danh mục</label>
                 <select name="id_danh_muc" id="category" class="search-select">
                     <option value="">Tất cả danh mục</option>
                     <?php foreach ($danh_muc as $dm): ?>
-                        <option value="<?= $dm['id'] ?>" <?= $id_danh_muc == $dm['id'] ? 'selected' : '' ?>>
-                            <?= htmlspecialchars($dm['ten_danh_muc']) ?>
-                        </option>
+                        <option value="<?= $dm['id'] ?>" <?= $id_danh_muc == $dm['id'] ? 'selected' : '' ?>><?= htmlspecialchars($dm['ten_danh_muc']) ?></option>
                     <?php endforeach; ?>
                 </select>
             </div>
-
-            <div class="search-buttons">
-                <button type="submit" class="btn btn-primary">
-                    🔍 Tìm kiếm
-                </button>
-                <a href="index.php?page=source_upload" class="btn btn-success">
-                    ➕ Đăng mã nguồn
-                </a>
-                <a href="index.php?page=them_danh_muc" class="btn btn-primary">
-                    ➕ Thêm danh mục mới
-                </a>
-
+            <div class="action-bar <?= $isAdmin ? '' : 'is-guest' ?>">
+                <button type="submit" class="btn btn-primary">🔍 Tìm kiếm</button>
+                <?php if ($isAdmin): ?>
+                    <a href="index.php?page=them_danh_muc" class="btn btn-primary">➕ Thêm danh mục</a>
+                <?php endif; ?>
+                <a href="index.php?page=source_upload" class="btn btn-success">📤 Đăng mã nguồn</a>
             </div>
         </form>
     </div>
 
     <?php if (empty($ds_ma_nguon)): ?>
-        <div class="empty-state">
-            <h3>🔍 Không tìm thấy mã nguồn</h3>
-            <p>Hiện tại chưa có mã nguồn nào phù hợp với từ khóa tìm kiếm của bạn.<br>
-                Hãy thử tìm kiếm với từ khóa khác hoặc trở thành người đầu tiên chia sẻ!</p>
-            <a href="index.php?page=source_upload" class="btn btn-primary">
-                ➕ Đăng mã nguồn đầu tiên
-            </a>
-        </div>
+        <div class="empty-state"> </div>
     <?php else: ?>
         <div class="posts-grid">
             <?php foreach ($ds_ma_nguon as $item): ?>
-                <div class="post-card">
+                <div class="post-card" data-post-id="<?= $item['id'] ?>">
                     <div class="post-header">
-                        <div class="avatar">
-                            <?= strtoupper(substr($item['ten_dang_nhap'], 0, 1)) ?>
-                        </div>
+                        <div class="avatar"><?= strtoupper(substr($item['ten_dang_nhap'], 0, 1)) ?></div>
                         <div class="post-info">
                             <h4><?= htmlspecialchars($item['ten_dang_nhap']) ?></h4>
                             <div class="post-meta">
@@ -462,35 +399,28 @@ ob_start();
                     </div>
 
                     <h3 class="post-title"><?= htmlspecialchars($item['tieu_de']) ?></h3>
-
                     <div class="post-description">
-                        <?php
-                        $mo_ta = htmlspecialchars($item['mo_ta']);
-                        if (strlen($mo_ta) > 200) {
-                            $mo_ta = substr($mo_ta, 0, 200) . '...';
-                        }
-                        echo $mo_ta;
-                        ?>
+                        <?= htmlspecialchars(mb_strimwidth($item['mo_ta'], 0, 180, '...')) ?>
                     </div>
 
-                    <?php if (!empty($item['cong_nghe'])): ?>
-                        <div class="tech-badge">
-                            💻 <?= htmlspecialchars($item['cong_nghe']) ?>
-                        </div>
-                    <?php endif; ?>
+                    <div class="post-footer">
+                        <?php if (!empty($item['cong_nghe'])): ?>
+                            <div class="tech-badge">💻 <?= htmlspecialchars($item['cong_nghe']) ?></div>
+                        <?php endif; ?>
+                        <?php if ($item['tong_so_reaction'] > 0): ?>
+                            <div class="reaction-stat">👍 <?= htmlspecialchars($item['tong_so_reaction']) ?></div>
+                        <?php endif; ?>
+                    </div>
 
                     <div class="post-actions">
-                        <div class="action-buttons">
-                            <button class="action-btn" onclick="toggleLike(this, <?= $item['id'] ?>)">
-                                👍 <span>0</span>
+                        <a href="index.php?page=source_detail&id=<?= $item['id'] ?>" class="btn btn-primary btn-detail">📖 Chi tiết</a>
+                        <?php if ($isLoggedIn):
+                        ?>
+                            <button class="save-button <?= $item['da_luu'] ? 'active' : '' ?>" title="Lưu bài viết">
+                                <i class="fa-regular fa-heart icon-regular"></i>
+                                <i class="fa-solid fa-heart icon-solid"></i>
                             </button>
-                            <button class="action-btn" onclick="toggleDislike(this, <?= $item['id'] ?>)">
-                                👎 <span>0</span>
-                            </button>
-                        </div>
-                        <a href="index.php?page=source_detail&id=<?= $item['id'] ?>" class="view-detail-btn">
-                            📖 Chi tiết
-                        </a>
+                        <?php endif; ?>
                     </div>
                 </div>
             <?php endforeach; ?>
@@ -499,70 +429,54 @@ ob_start();
 </div>
 
 <script>
-    function toggleLike(button, postId) {
-        const isLiked = button.classList.contains('liked');
-
-        if (isLiked) {
-            button.classList.remove('liked');
-            button.style.color = '#666';
-            button.style.background = '';
-        } else {
-            button.classList.add('liked');
-            button.style.color = '#28a745';
-            button.style.background = '#f8fff8';
-
-            // Remove dislike if exists
-            const dislikeBtn = button.nextElementSibling;
-            dislikeBtn.classList.remove('liked');
-            dislikeBtn.style.color = '#666';
-            dislikeBtn.style.background = '';
-        }
-
-        // Ở đây bạn có thể thêm AJAX call để lưu vào database
-        console.log(`Post ${postId} ${isLiked ? 'unliked' : 'liked'}`);
-    }
-
-    function toggleDislike(button, postId) {
-        const isDisliked = button.classList.contains('liked');
-
-        if (isDisliked) {
-            button.classList.remove('liked');
-            button.style.color = '#666';
-            button.style.background = '';
-        } else {
-            button.classList.add('liked');
-            button.style.color = '#e74c3c';
-            button.style.background = '#fff8f8';
-
-            // Remove like if exists
-            const likeBtn = button.previousElementSibling;
-            likeBtn.classList.remove('liked');
-            likeBtn.style.color = '#666';
-            likeBtn.style.background = '';
-        }
-
-        // Ở đây bạn có thể thêm AJAX call để lưu vào database
-        console.log(`Post ${postId} ${isDisliked ? 'undisliked' : 'disliked'}`);
-    }
-
-    // Animation khi scroll
     document.addEventListener('DOMContentLoaded', function() {
-        const cards = document.querySelectorAll('.post-card');
+        const saveButtons = document.querySelectorAll('.save-button');
+        const isLoggedIn = <?= json_encode($isLoggedIn) ?>;
 
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.style.opacity = '1';
-                    entry.target.style.transform = 'translateY(0)';
+        saveButtons.forEach(button => {
+            button.addEventListener('click', async function() {
+                if (!isLoggedIn) {
+                    alert('Vui lòng đăng nhập để sử dụng chức năng này.');
+                    return;
+                }
+
+                const card = this.closest('.post-card');
+                const postId = card.dataset.postId;
+
+                // Vô hiệu hóa nút tạm thời để tránh click nhiều lần
+                this.disabled = true;
+
+                try {
+                    const response = await fetch('src/Views/ajax_savepost.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            postId: postId
+                        })
+                    });
+
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.error || 'Có lỗi xảy ra, vui lòng thử lại.');
+                    }
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        this.classList.toggle('active', data.is_saved);
+                    } else {
+                        alert(data.error);
+                    }
+
+                } catch (error) {
+                    console.error('Lỗi khi lưu bài viết:', error);
+                    alert(error.message);
+                } finally {
+                    this.disabled = false;
                 }
             });
-        });
-
-        cards.forEach(card => {
-            card.style.opacity = '0';
-            card.style.transform = 'translateY(30px)';
-            card.style.transition = 'all 0.6s ease';
-            observer.observe(card);
         });
     });
 </script>

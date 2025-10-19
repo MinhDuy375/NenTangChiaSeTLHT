@@ -3,7 +3,7 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 include __DIR__ . '/../../config/ketNoiDB.php';
-include __DIR__ . '/../../vendor/autoload.php';
+include __DIR__ . '/../../Vendor/autoload.php';
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;

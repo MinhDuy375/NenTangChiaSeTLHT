@@ -4,6 +4,11 @@ $servername = "localhost";
 $username = "root";
 $password = "duy3725";
 $dbname = "chiasetailieudb2";
+
+// $servername = "sql312.infinityfree.com";
+// $username = "if0_39838965";
+// $password = "k6eZQbnkGMUO6MY";
+// $dbname = "if0_39838965_chiasetailieudb";
 //tạo các bến chứa thông tin của conections 
 
 // kết nối tới db
