@@ -47,8 +47,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $time_remaining = max(0, $_SESSION['otp_expire'] - time());
 ?>
 
-<div class="container">
-    <div class="form-box">
+<div class="container" style="display: flex; justify-content: center; align-items: center;  ">
+    <div class="form-box" style="width: 500px">
         <h2>Xác nhận mã OTP</h2>
         <p>Mã OTP đã được gửi đến email:
             <strong style="color: #007bff;"><?= htmlspecialchars($_SESSION['reset_email']) ?></strong>

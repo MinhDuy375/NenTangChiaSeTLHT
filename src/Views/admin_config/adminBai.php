@@ -1,106 +1,118 @@
 <?php
 include __DIR__ . '/../../../config/ketNoiDB.php';
 
-// Lấy id môn học
-$id_mon_hoc = isset($_GET['id_mon_hoc']) ? (int)$_GET['id_mon_hoc'] : 0;
-
-if ($id_mon_hoc == 0) {
-    header("Location: index.php?page=adminMon");
-    exit;
-}
-
-// Lấy thông tin môn học
-$sql = "SELECT * FROM mon_hoc WHERE id = ?";
-$stmt = $pdo->prepare($sql);
-$stmt->execute([$id_mon_hoc]);
-$mon_hoc = $stmt->fetch();
-
-if (!$mon_hoc) {
-    header("Location: index.php?page=adminMon");
-    exit;
-}
-
 // Xử lý AJAX
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['ajax'])) {
     header('Content-Type: application/json');
 
-    // Xóa tài liệu
-    if (isset($_POST['xoa_tai_lieu'])) {
+    // Xóa bài viết
+    if (isset($_POST['xoa_bai_viet'])) {
         $id = $_POST['id'];
 
         // Lấy thông tin file trước khi xóa
-        $sql = "SELECT file_upload FROM bai_chia_se WHERE id = ? AND id_mon_hoc = ?";
+        $sql = "SELECT file_upload FROM bai_chia_se WHERE id = ? AND loai = 'bai_viet'";
         $stmt = $pdo->prepare($sql);
-        $stmt->execute([$id, $id_mon_hoc]);
-        $tai_lieu = $stmt->fetch();
+        $stmt->execute([$id]);
+        $bai = $stmt->fetch();
 
-        if ($tai_lieu && $tai_lieu['file_upload']) {
-            $file_path = __DIR__ . '/../../../' . $tai_lieu['file_upload'];
+        if ($bai && $bai['file_upload']) {
+            $file_path = __DIR__ . '/../../../' . $bai['file_upload'];
             if (file_exists($file_path)) {
                 unlink($file_path);
             }
         }
 
         // Xóa trong database
-        $sql = "DELETE FROM bai_chia_se WHERE id = ? AND id_mon_hoc = ?";
+        $sql = "DELETE FROM bai_chia_se WHERE id = ? AND loai = 'bai_viet'";
         $stmt = $pdo->prepare($sql);
-        $stmt->execute([$id, $id_mon_hoc]);
+        $stmt->execute([$id]);
 
-        echo json_encode(['success' => true, 'message' => 'Xóa tài liệu thành công!']);
+        echo json_encode(['success' => true, 'message' => 'Xóa bài viết thành công!']);
         exit;
     }
 
-    // Lấy thông tin tài liệu để sửa
-    if (isset($_POST['lay_tai_lieu'])) {
+    // Lấy thông tin bài viết để sửa
+    if (isset($_POST['lay_bai_viet'])) {
         $id = $_POST['id'];
-        $sql = "SELECT * FROM bai_chia_se WHERE id = ? AND id_mon_hoc = ?";
+        $sql = "SELECT * FROM bai_chia_se WHERE id = ? AND loai = 'bai_viet'";
         $stmt = $pdo->prepare($sql);
-        $stmt->execute([$id, $id_mon_hoc]);
-        $tai_lieu = $stmt->fetch();
+        $stmt->execute([$id]);
+        $bai = $stmt->fetch();
 
-        echo json_encode(['success' => true, 'data' => $tai_lieu]);
+        echo json_encode(['success' => true, 'data' => $bai]);
         exit;
     }
 
-    // Cập nhật tài liệu
-    if (isset($_POST['sua_tai_lieu'])) {
+    // Sửa bài viết
+    if (isset($_POST['sua_bai_viet'])) {
         $id = $_POST['id'];
         $tieu_de = lam_sach_chuoi($_POST['tieu_de']);
         $mo_ta = lam_sach_chuoi($_POST['mo_ta']);
+        $cong_nghe = lam_sach_chuoi($_POST['cong_nghe']);
+        $link_host = lam_sach_chuoi($_POST['link_host']);
+        $link_source = lam_sach_chuoi($_POST['link_source']);
+        $id_danh_muc = !empty($_POST['id_danh_muc']) ? (int)$_POST['id_danh_muc'] : null;
 
-        $sql = "UPDATE bai_chia_se SET tieu_de = ?, mo_ta = ?, ngay_cap_nhat = NOW() WHERE id = ? AND id_mon_hoc = ?";
+        $sql = "UPDATE bai_chia_se SET tieu_de = ?, mo_ta = ?, cong_nghe = ?, link_host = ?, link_source = ?, id_danh_muc = ?, ngay_cap_nhat = NOW() WHERE id = ? AND loai = 'bai_viet'";
         $stmt = $pdo->prepare($sql);
-        $stmt->execute([$tieu_de, $mo_ta, $id, $id_mon_hoc]);
+        $stmt->execute([$tieu_de, $mo_ta, $cong_nghe, $link_host, $link_source, $id_danh_muc, $id]);
 
-        echo json_encode(['success' => true, 'message' => 'Cập nhật tài liệu thành công!']);
+        echo json_encode(['success' => true, 'message' => 'Cập nhật bài viết thành công!']);
         exit;
     }
 }
 
-// Tìm kiếm
-$tu_khoa = isset($_GET['search']) ? lam_sach_chuoi($_GET['search']) : '';
+// Lấy danh sách bài viết
+$search = isset($_GET['search']) ? lam_sach_chuoi($_GET['search']) : '';
+$filter_category = isset($_GET['category']) ? (int)$_GET['category'] : 0;
 
-// Lấy danh sách tài liệu
-if ($tu_khoa) {
-    $sql = "SELECT b.*, n.ten_dang_nhap 
-            FROM bai_chia_se b 
-            JOIN nguoi_dung n ON b.id_nguoi_dung = n.id 
-            WHERE b.id_mon_hoc = ? AND b.loai = 'tai_lieu' 
-            AND (b.tieu_de LIKE ? OR b.mo_ta LIKE ?) 
-            ORDER BY b.ngay_tao DESC";
+if (!empty($search) || $filter_category > 0) {
+    $sql = "SELECT b.*, n.ho_ten, d.ten_danh_muc
+            FROM bai_chia_se b
+            JOIN nguoi_dung n ON b.id_nguoi_dung = n.id
+            LEFT JOIN danh_muc d ON b.id_danh_muc = d.id
+            WHERE b.loai = 'bai_viet'";
+
+    if (!empty($search)) {
+        $sql .= " AND (b.tieu_de LIKE ? OR b.mo_ta LIKE ? OR b.cong_nghe LIKE ?)";
+    }
+
+    if ($filter_category > 0) {
+        $sql .= " AND b.id_danh_muc = ?";
+    }
+
+    $sql .= " ORDER BY b.ngay_tao DESC";
+
     $stmt = $pdo->prepare($sql);
-    $search_term = "%$tu_khoa%";
-    $stmt->execute([$id_mon_hoc, $search_term, $search_term]);
+
+    $params = [];
+    if (!empty($search)) {
+        $search_term = "%$search%";
+        $params[] = $search_term;
+        $params[] = $search_term;
+        $params[] = $search_term;
+    }
+    if ($filter_category > 0) {
+        $params[] = $filter_category;
+    }
+
+    $stmt->execute($params);
 } else {
-    $sql = "SELECT b.*, n.ten_dang_nhap 
-            FROM bai_chia_se b 
-            JOIN nguoi_dung n ON b.id_nguoi_dung = n.id 
-            WHERE b.id_mon_hoc = ? AND b.loai = 'tai_lieu' 
+    $sql = "SELECT b.*, n.ho_ten, d.ten_danh_muc
+            FROM bai_chia_se b
+            JOIN nguoi_dung n ON b.id_nguoi_dung = n.id
+            LEFT JOIN danh_muc d ON b.id_danh_muc = d.id
+            WHERE b.loai = 'bai_viet'
             ORDER BY b.ngay_tao DESC";
     $stmt = $pdo->prepare($sql);
-    $stmt->execute([$id_mon_hoc]);
+    $stmt->execute();
 }
-$danh_sach_tai_lieu = $stmt->fetchAll();
+
+$danh_sach_bai_viet = $stmt->fetchAll();
+
+// Lấy danh sách danh mục cho bộ lọc
+$sql_categories = "SELECT * FROM danh_muc ORDER BY ten_danh_muc ASC";
+$categories = $pdo->query($sql_categories)->fetchAll();
 ?>
 <!DOCTYPE html>
 <html lang="vi">
@@ -108,7 +120,7 @@ $danh_sach_tai_lieu = $stmt->fetchAll();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tài Liệu - <?php echo $mon_hoc['ten_mon']; ?></title>
+    <title>Quản lý Bài Viết</title>
     <style>
         * {
             margin: 0;
@@ -143,19 +155,9 @@ $danh_sach_tai_lieu = $stmt->fetchAll();
             gap: 15px;
         }
 
-        .header-left {
-            flex: 1;
-        }
-
         h1 {
             color: #2c3e50;
             font-size: 1.8em;
-            margin-bottom: 5px;
-        }
-
-        .mon-info {
-            color: #6c757d;
-            font-size: 0.9em;
         }
 
         .btn {
@@ -177,6 +179,15 @@ $danh_sach_tai_lieu = $stmt->fetchAll();
 
         .btn-back:hover {
             background: #5a6268;
+        }
+
+        .btn-primary {
+            background: #007bff;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #0056b3;
         }
 
         .btn-success {
@@ -256,7 +267,7 @@ $danh_sach_tai_lieu = $stmt->fetchAll();
             }
         }
 
-        /* Search */
+        /* Search & Filter */
         .search-section {
             background: #f8f9fa;
             padding: 20px;
@@ -265,14 +276,13 @@ $danh_sach_tai_lieu = $stmt->fetchAll();
         }
 
         .search-form {
-            display: flex;
+            display: grid;
+            grid-template-columns: 1fr 200px;
             gap: 10px;
             flex-wrap: wrap;
         }
 
         .search-input {
-            flex: 1;
-            min-width: 200px;
             padding: 10px 15px;
             border: 1px solid #ced4da;
             border-radius: 6px;
@@ -280,6 +290,26 @@ $danh_sach_tai_lieu = $stmt->fetchAll();
         }
 
         .search-input:focus {
+            outline: none;
+            border-color: #007bff;
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+        }
+
+        .filter-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+
+        .filter-group select {
+            padding: 10px 15px;
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .filter-group select:focus {
             outline: none;
             border-color: #007bff;
             box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
@@ -320,26 +350,19 @@ $danh_sach_tai_lieu = $stmt->fetchAll();
             flex-wrap: wrap;
         }
 
-        .file-link {
-            color: #007bff;
-            text-decoration: none;
-        }
-
-        .file-link:hover {
-            text-decoration: underline;
+        .category-badge {
+            display: inline-block;
+            background: #e7f3ff;
+            color: #0056b3;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
         }
 
         .empty-state {
             text-align: center;
             padding: 60px 20px;
             color: #6c757d;
-        }
-
-        .empty-state svg {
-            width: 80px;
-            height: 80px;
-            margin-bottom: 20px;
-            opacity: 0.5;
         }
 
         /* Modal */
@@ -355,6 +378,7 @@ $danh_sach_tai_lieu = $stmt->fetchAll();
             justify-content: center;
             align-items: center;
             padding: 20px;
+            overflow-y: auto;
         }
 
         .modal.show {
@@ -365,7 +389,7 @@ $danh_sach_tai_lieu = $stmt->fetchAll();
             background: white;
             border-radius: 8px;
             padding: 30px;
-            max-width: 500px;
+            max-width: 600px;
             width: 100%;
             max-height: 90vh;
             overflow-y: auto;
@@ -405,7 +429,8 @@ $danh_sach_tai_lieu = $stmt->fetchAll();
         }
 
         input[type="text"],
-        textarea {
+        textarea,
+        select {
             width: 100%;
             padding: 10px 15px;
             border: 1px solid #ced4da;
@@ -415,7 +440,8 @@ $danh_sach_tai_lieu = $stmt->fetchAll();
         }
 
         input[type="text"]:focus,
-        textarea:focus {
+        textarea:focus,
+        select:focus {
             outline: none;
             border-color: #007bff;
             box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
@@ -423,7 +449,7 @@ $danh_sach_tai_lieu = $stmt->fetchAll();
 
         textarea {
             resize: vertical;
-            min-height: 100px;
+            min-height: 80px;
         }
 
         .modal-footer {
@@ -449,11 +475,7 @@ $danh_sach_tai_lieu = $stmt->fetchAll();
             }
 
             .search-form {
-                flex-direction: column;
-            }
-
-            .search-input {
-                width: 100%;
+                grid-template-columns: 1fr;
             }
 
             .actions {
@@ -493,74 +515,70 @@ $danh_sach_tai_lieu = $stmt->fetchAll();
 <body>
     <div class="container">
         <div class="header">
-            <div class="header-left">
-                <h1>📄 Tài Liệu Môn Học</h1>
-                <div class="mon-info">
-                    <strong><?php echo $mon_hoc['ten_mon']; ?></strong>
-                    <?php if ($mon_hoc['mo_ta']): ?>
-                        - <?php echo $mon_hoc['mo_ta']; ?>
-                    <?php endif; ?>
-                </div>
-            </div>
-            <a href="index.php?page=adminMon" class="btn btn-back">← Quay lại</a>
+            <h1>📝 Quản Lý Bài Viết</h1>
+            <a href="index.php?page=admin" class="btn btn-back">← Quay lại</a>
         </div>
 
         <div id="alertMessage" class="alert"></div>
 
         <div class="search-section">
             <form class="search-form" method="GET" action="">
-                <input type="hidden" name="page" value="tailieumon">
-                <input type="hidden" name="id_mon_hoc" value="<?php echo $id_mon_hoc; ?>">
-                <input type="text" name="search" class="search-input"
-                    placeholder="Tìm kiếm tài liệu..."
-                    value="<?php echo htmlspecialchars($tu_khoa); ?>">
-                <button type="submit" class="btn btn-primary">🔍 Tìm kiếm</button>
-                <?php if ($tu_khoa): ?>
-                    <a href="index.php?page=tailieumon&id_mon_hoc=<?php echo $id_mon_hoc; ?>"
-                        class="btn btn-secondary">Xóa bộ lọc</a>
-                <?php endif; ?>
+                <div>
+                    <input type="hidden" name="page" value="adminBai">
+                    <input type="text" name="search" class="search-input" placeholder="Tìm kiếm theo tiêu đề, mô tả, công nghệ..." value="<?php echo htmlspecialchars($search); ?>">
+                </div>
+                <button type="submit" class="btn btn-primary">Tìm kiếm</button>
             </form>
+
+            <div class="filter-group">
+                <select name="category" id="filterCategory" onchange="filterByCategory()">
+                    <option value="">Tất cả danh mục</option>
+                    <?php foreach ($categories as $cat): ?>
+                        <option value="<?php echo $cat['id']; ?>" <?php echo $filter_category == $cat['id'] ? 'selected' : ''; ?>>
+                            <?php echo htmlspecialchars($cat['ten_danh_muc']); ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+                <?php if ($search || $filter_category > 0): ?>
+                    <a href="index.php?page=adminBai" class="btn btn-secondary">Xóa bộ lọc</a>
+                <?php endif; ?>
+            </div>
         </div>
 
-        <?php if (count($danh_sach_tai_lieu) > 0): ?>
-            <h2>Danh Sách Tài Liệu (<?php echo count($danh_sach_tai_lieu); ?>)</h2>
+        <?php if (count($danh_sach_bai_viet) > 0): ?>
+            <h2>Danh Sách Bài Viết (<?php echo count($danh_sach_bai_viet); ?>)</h2>
             <div class="table-container">
                 <table>
                     <thead>
                         <tr>
                             <th>ID</th>
                             <th>Tiêu Đề</th>
-                            <th>Mô Tả</th>
-                            <th>File</th>
-                            <th>Người Đăng</th>
+                            <th>Danh Mục</th>
+                            <th>Công Nghệ</th>
+                            <th>Tác Giả</th>
                             <th>Ngày Tạo</th>
                             <th>Thao Tác</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <?php foreach ($danh_sach_tai_lieu as $tai_lieu): ?>
-                            <tr data-id="<?php echo $tai_lieu['id']; ?>">
-                                <td><?php echo $tai_lieu['id']; ?></td>
-                                <td><strong><?php echo $tai_lieu['tieu_de']; ?></strong></td>
-                                <td><?php echo mb_substr($tai_lieu['mo_ta'], 0, 100); ?><?php echo mb_strlen($tai_lieu['mo_ta']) > 100 ? '...' : ''; ?></td>
+                        <?php foreach ($danh_sach_bai_viet as $bai): ?>
+                            <tr data-id="<?php echo $bai['id']; ?>">
+                                <td><?php echo $bai['id']; ?></td>
+                                <td><strong><?php echo htmlspecialchars($bai['tieu_de']); ?></strong></td>
                                 <td>
-                                    <?php if ($tai_lieu['file_upload']): ?>
-                                        <a href="<?php echo $tai_lieu['file_upload']; ?>"
-                                            target="_blank" class="file-link">
-                                            📎 Tải xuống
-                                        </a>
+                                    <?php if ($bai['ten_danh_muc']): ?>
+                                        <span class="category-badge"><?php echo htmlspecialchars($bai['ten_danh_muc']); ?></span>
                                     <?php else: ?>
-                                        <span style="color: #6c757d;">Không có</span>
+                                        <span style="color: #6c757d;">-</span>
                                     <?php endif; ?>
                                 </td>
-                                <td><?php echo $tai_lieu['ten_dang_nhap']; ?></td>
-                                <td><?php echo dinh_dang_ngay($tai_lieu['ngay_tao']); ?></td>
+                                <td><?php echo htmlspecialchars($bai['cong_nghe'] ?? '-'); ?></td>
+                                <td><?php echo htmlspecialchars($bai['ho_ten']); ?></td>
+                                <td><?php echo dinh_dang_ngay($bai['ngay_tao']); ?></td>
                                 <td>
                                     <div class="actions">
-                                        <button onclick="moModalSua(<?php echo $tai_lieu['id']; ?>)"
-                                            class="btn btn-warning">Sửa</button>
-                                        <button onclick="xoaTaiLieu(<?php echo $tai_lieu['id']; ?>)"
-                                            class="btn btn-danger">Xóa</button>
+                                        <button onclick="moModalSua(<?php echo $bai['id']; ?>)" class="btn btn-warning">Sửa</button>
+                                        <button onclick="xoaBaiViet(<?php echo $bai['id']; ?>)" class="btn btn-danger">Xóa</button>
                                     </div>
                                 </td>
                             </tr>
@@ -570,22 +588,19 @@ $danh_sach_tai_lieu = $stmt->fetchAll();
             </div>
         <?php else: ?>
             <div class="empty-state">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-                <h3>Chưa có tài liệu nào</h3>
-                <p><?php echo $tu_khoa ? 'Không tìm thấy tài liệu phù hợp với từ khóa "' . htmlspecialchars($tu_khoa) . '"' : 'Môn học này chưa có tài liệu nào.'; ?></p>
+                <h3>Chưa có bài viết nào</h3>
+                <p><?php echo $search ? 'Không tìm thấy bài viết phù hợp với từ khóa "' . htmlspecialchars($search) . '"' : 'Hệ thống chưa có bài viết nào.'; ?></p>
             </div>
         <?php endif; ?>
     </div>
 
-    <!-- Modal Sửa -->
+    <!-- Modal Sửa Bài Viết -->
     <div id="modalSua" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>Sửa Tài Liệu</h2>
+                <h2>Sửa Bài Viết</h2>
             </div>
-            <form id="formSuaTaiLieu">
+            <form id="formSua">
                 <input type="hidden" name="id" id="sua_id">
 
                 <div class="form-group">
@@ -594,8 +609,35 @@ $danh_sach_tai_lieu = $stmt->fetchAll();
                 </div>
 
                 <div class="form-group">
+                    <label>Danh Mục:</label>
+                    <select name="id_danh_muc" id="sua_id_danh_muc">
+                        <option value="">Không chọn danh mục</option>
+                        <?php foreach ($categories as $cat): ?>
+                            <option value="<?php echo $cat['id']; ?>">
+                                <?php echo htmlspecialchars($cat['ten_danh_muc']); ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+
+                <div class="form-group">
                     <label>Mô Tả:</label>
                     <textarea name="mo_ta" id="sua_mo_ta"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Công Nghệ:</label>
+                    <input type="text" name="cong_nghe" id="sua_cong_nghe" placeholder="VD: PHP, Laravel, MySQL">
+                </div>
+
+                <div class="form-group">
+                    <label>Link Hosting:</label>
+                    <input type="text" name="link_host" id="sua_link_host" placeholder="VD: https://example.com">
+                </div>
+
+                <div class="form-group">
+                    <label>Link Source:</label>
+                    <input type="text" name="link_source" id="sua_link_source" placeholder="VD: https://github.com/...">
                 </div>
 
                 <div class="modal-footer">
@@ -607,7 +649,6 @@ $danh_sach_tai_lieu = $stmt->fetchAll();
     </div>
 
     <script>
-        // Hiển thị thông báo
         function hienThongBao(message, type = 'success') {
             const alert = document.getElementById('alertMessage');
             alert.className = `alert alert-${type} show`;
@@ -618,17 +659,13 @@ $danh_sach_tai_lieu = $stmt->fetchAll();
             }, 3000);
         }
 
-        // Mở modal sửa
         function moModalSua(id) {
             const formData = new FormData();
             formData.append('ajax', '1');
-            formData.append('lay_tai_lieu', '1');
+            formData.append('lay_bai_viet', '1');
             formData.append('id', id);
 
-            const urlParams = new URLSearchParams(window.location.search);
-            const url = window.location.pathname + '?' + urlParams.toString();
-
-            fetch(url, {
+            fetch(window.location.href, {
                     method: 'POST',
                     body: formData
                 })
@@ -637,37 +674,26 @@ $danh_sach_tai_lieu = $stmt->fetchAll();
                     if (data.success) {
                         document.getElementById('sua_id').value = data.data.id;
                         document.getElementById('sua_tieu_de').value = data.data.tieu_de;
+                        document.getElementById('sua_id_danh_muc').value = data.data.id_danh_muc || '';
                         document.getElementById('sua_mo_ta').value = data.data.mo_ta || '';
+                        document.getElementById('sua_cong_nghe').value = data.data.cong_nghe || '';
+                        document.getElementById('sua_link_host').value = data.data.link_host || '';
+                        document.getElementById('sua_link_source').value = data.data.link_source || '';
                         document.getElementById('modalSua').classList.add('show');
-                    } else {
-                        hienThongBao('Không thể tải thông tin tài liệu!', 'danger');
                     }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    hienThongBao('Có lỗi xảy ra!', 'danger');
                 });
         }
 
-        // Đóng modal
         function dongModal() {
             document.getElementById('modalSua').classList.remove('show');
         }
 
-        // Click outside modal to close
-        document.getElementById('modalSua').addEventListener('click', function(e) {
-            if (e.target === this) {
-                dongModal();
-            }
-        });
-
-        // Sửa tài liệu
-        document.getElementById('formSuaTaiLieu').addEventListener('submit', function(e) {
+        document.getElementById('formSua').addEventListener('submit', function(e) {
             e.preventDefault();
 
             const formData = new FormData(this);
             formData.append('ajax', '1');
-            formData.append('sua_tai_lieu', '1');
+            formData.append('sua_bai_viet', '1');
 
             fetch(window.location.href, {
                     method: 'POST',
@@ -678,27 +704,20 @@ $danh_sach_tai_lieu = $stmt->fetchAll();
                     if (data.success) {
                         hienThongBao(data.message, 'success');
                         dongModal();
-                        setTimeout(() => {
-                            location.reload();
-                        }, 1000);
+                        setTimeout(() => location.reload(), 1000);
                     } else {
                         hienThongBao('Có lỗi xảy ra!', 'danger');
                     }
                 })
-                .catch(error => {
-                    hienThongBao('Có lỗi xảy ra!', 'danger');
-                });
+                .catch(error => hienThongBao('Có lỗi xảy ra!', 'danger'));
         });
 
-        // Xóa tài liệu
-        function xoaTaiLieu(id) {
-            if (!confirm('Bạn có chắc muốn xóa tài liệu này?')) {
-                return;
-            }
+        function xoaBaiViet(id) {
+            if (!confirm('Bạn có chắc chắn muốn xóa bài viết này?')) return;
 
             const formData = new FormData();
             formData.append('ajax', '1');
-            formData.append('xoa_tai_lieu', '1');
+            formData.append('xoa_bai_viet', '1');
             formData.append('id', id);
 
             fetch(window.location.href, {
@@ -709,17 +728,24 @@ $danh_sach_tai_lieu = $stmt->fetchAll();
                 .then(data => {
                     if (data.success) {
                         hienThongBao(data.message, 'success');
-                        setTimeout(() => {
-                            location.reload();
-                        }, 1000);
+                        setTimeout(() => location.reload(), 1000);
                     } else {
                         hienThongBao('Có lỗi xảy ra!', 'danger');
                     }
                 })
-                .catch(error => {
-                    hienThongBao('Có lỗi xảy ra!', 'danger');
-                });
+                .catch(error => hienThongBao('Có lỗi xảy ra!', 'danger'));
         }
+
+        function filterByCategory() {
+            const category = document.getElementById('filterCategory').value;
+            if (category) {
+                window.location.href = `index.php?page=adminBai&category=${category}`;
+            }
+        }
+
+        document.getElementById('modalSua').addEventListener('click', function(e) {
+            if (e.target === this) dongModal();
+        });
     </script>
 </body>
 

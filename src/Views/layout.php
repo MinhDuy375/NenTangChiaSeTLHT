@@ -426,9 +426,11 @@
             <a href="index.php?page=thu_vien" <?= ($page ?? '') == 'thu_vien' ? 'class="active"' : '' ?>>
                 Yêu thích
             </a>
-            <a href="index.php?page=admin" <?= ($page ?? '') == 'admin' ? 'class="active"' : '' ?>>
-                Hệ thống
-            </a>
+            <?php if (!empty($_SESSION['user_id']) && $_SESSION['vai_tro'] == 'quan_tri_vien'): ?>
+                <a href="index.php?page=admin" <?= ($page ?? '') == 'admin' ? 'class="active"' : '' ?>>
+                    Hệ thống
+                </a>
+            <?php endif; ?>
         </nav>
 
         <div class="user-section" id="userSection">
@@ -443,7 +445,7 @@
                     <button type="submit" class="logout-btn">Đăng xuất</button>
                 </form>
             <?php else: ?>
-                <a href="src/Views/logout.php" style="text-decoration: none; font-weight:bold; color:white;">Đăng nhập</a>
+                <a href="src/Views/logout.php" style="text-decoration: none; font-weight:bold; color:white; padding: 15px; background-color: skyblue; border-radius: 15px;">Đăng nhập</a>
             <?php endif; ?>
         </div>
     </header>

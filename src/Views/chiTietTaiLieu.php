@@ -1,27 +1,55 @@
 <?php
 // chi_tiet_tai_lieu.php - Trang chi tiết tài liệu với preview
 // Đặt file này trong thư mục src/Views/
+
+// Khởi tạo session
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+$is_logged_in = isset($_SESSION['user_id']);
+$username = $_SESSION['username'] ?? '';
+
 include __DIR__ . '/../../config/ketNoiDB.php';
 
 // Lấy ID tài liệu từ URL
 $id_tai_lieu = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 $id_bai_chia_se = (int)($_GET['id'] ?? 0);
+$userId = $is_logged_in ? (int)$_SESSION['user_id'] : 0;
 
 if ($id_tai_lieu <= 0) {
     header('Location: danhSachMon.php');
     exit;
 }
 
-// Lấy thông tin chi tiết tài liệu
+// ===================================
+// SQL QUERY ĐÃ CẬP NHẬT
+// ===================================
 try {
-    $sql = "SELECT bcs.*, mh.ten_mon, nd.ho_ten as ten_nguoi_dang, nd.email as email_nguoi_dang
+    $sql = "SELECT 
+                bcs.*, 
+                mh.ten_mon, 
+                nd.ho_ten as ten_nguoi_dang, 
+                nd.email as email_nguoi_dang,
+                -- Đếm tổng reaction từ bảng `reaction`
+                (SELECT COUNT(*) FROM reaction r WHERE r.id_bai_chia_se = bcs.id) AS tong_so_reaction,
+                -- Đếm tổng dislike từ bảng `tuong_tac`
+                (SELECT COUNT(*) FROM tuong_tac t WHERE t.id_bai_chia_se = bcs.id AND t.loai = 'dislike') AS so_luot_dislike,
+                -- Lấy chi tiết các loại reaction để hiển thị icon
+                (SELECT GROUP_CONCAT(CONCAT(r.loai_cam_xuc, ':', r.count) SEPARATOR ';')
+                 FROM (SELECT loai_cam_xuc, COUNT(*) as count FROM reaction WHERE id_bai_chia_se = bcs.id GROUP BY loai_cam_xuc) r
+                ) AS chi_tiet_reaction,
+                -- Lấy reaction của user hiện tại
+                (SELECT r.loai_cam_xuc FROM reaction r WHERE r.id_bai_chia_se = bcs.id AND r.id_nguoi_dung = :uid) AS user_reaction,
+                -- Kiểm tra user hiện tại đã dislike chưa
+                EXISTS(SELECT 1 FROM tuong_tac t WHERE t.id_bai_chia_se = bcs.id AND t.id_nguoi_dung = :uid AND t.loai = 'dislike') AS da_dislike
             FROM bai_chia_se bcs 
             LEFT JOIN mon_hoc mh ON bcs.id_mon_hoc = mh.id
             LEFT JOIN nguoi_dung nd ON bcs.id_nguoi_dung = nd.id
             WHERE bcs.id = :id_tai_lieu AND bcs.loai = 'tai_lieu'";
 
     $stmt = $pdo->prepare($sql);
-    $stmt->execute([':id_tai_lieu' => $id_tai_lieu]);
+    $stmt->execute([':id_tai_lieu' => $id_tai_lieu, ':uid' => $userId]);
     $tai_lieu = $stmt->fetch();
 
     if (!$tai_lieu) {
@@ -51,6 +79,16 @@ try {
 } catch (PDOException $e) {
     $tai_lieu_lien_quan = array();
 }
+
+// Lấy comments
+$comments_sql = "SELECT c.*, u.ho_ten as commenter_name, c.id_nguoi_dung
+                 FROM binh_luan c 
+                 LEFT JOIN nguoi_dung u ON c.id_nguoi_dung = u.id 
+                 WHERE c.id_bai_chia_se = :id 
+                 ORDER BY c.ngay_tao DESC";
+$comments_stmt = $pdo->prepare($comments_sql);
+$comments_stmt->execute(['id' => $id_tai_lieu]);
+$comments = $comments_stmt->fetchAll();
 
 // Hàm tạo URL preview cho Google Docs Viewer
 function tao_url_preview($duong_dan_file)
@@ -113,12 +151,11 @@ function tinh_kich_thuoc_file($duong_dan_file)
         }
 
         .container {
-            max-width: 1400px;
+            max-width: 1600px;
             margin: 0 auto;
             background: white;
             min-height: 100vh;
         }
-
 
         .header {
             background: linear-gradient(45deg, #2196F3, #21CBF3);
@@ -134,31 +171,6 @@ function tinh_kich_thuoc_file($duong_dan_file)
             font-size: 14px;
             opacity: 0.9;
             margin-bottom: 10px;
-        }
-
-        .share-btn {
-            background-color: #1877f2;
-            /* xanh Facebook */
-            color: white;
-            border: none;
-            padding: 8px 14px;
-            border-radius: 6px;
-            font-size: 14px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: 0.3s;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .share-btn:hover {
-            background-color: #145db2;
-            /* màu đậm hơn khi hover */
-        }
-
-        .share-btn:active {
-            transform: scale(0.96);
         }
 
         .breadcrumb a {
@@ -212,57 +224,11 @@ function tinh_kich_thuoc_file($duong_dan_file)
             flex-direction: column;
         }
 
-        .preview-header {
-            background: white;
-            padding: 20px;
-            border-bottom: 1px solid #dee2e6;
-        }
-
-        .preview-title {
-            font-size: 1.3em;
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .preview-meta {
-            color: #6c757d;
-            font-size: 0.9em;
-        }
-
         .preview-container {
             flex: 1;
             padding: 20px;
             display: flex;
             flex-direction: column;
-        }
-
-        .share-btn {
-            background-color: #1877f2;
-            /* xanh Facebook */
-            color: white;
-            border: none;
-            padding: 8px 14px;
-            border-radius: 6px;
-            font-size: 14px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: 0.3s;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .share-btn:hover {
-            background-color: #145db2;
-            /* màu đậm hơn khi hover */
-        }
-
-        .share-btn:active {
-            transform: scale(0.96);
         }
 
         .preview-iframe {
@@ -394,53 +360,182 @@ function tinh_kich_thuoc_file($duong_dan_file)
             color: #6c757d;
         }
 
-        .reaction-box {
-            display: inline-flex;
+        /* ==================== REACTION STYLES ==================== */
+        .post-stats {
+            padding: 15px 25px;
+            border-top: 1px solid #f0f0f0;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            justify-content: space-between;
             align-items: center;
-            position: relative;
-            margin-top: 10px;
+            font-size: 14px;
+            color: #666;
+            background: #fafafa;
+            min-height: 50px;
+        }
+
+        .reaction-summary {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .reaction-icons {
+            display: flex;
+            align-items: center;
+        }
+
+        .reaction-icon {
+            font-size: 18px;
+            margin-left: -5px;
+            background: white;
+            border-radius: 50%;
+            padding: 2px;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+        }
+
+        .reaction-count,
+        .dislike-count,
+        .comment-count {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .post-actions {
+            padding: 15px 25px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .action-button {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px;
+            background: none;
+            border: 2px solid #f0f0f0;
+            color: #666;
+            font-weight: 600;
+            font-size: 14px;
             cursor: pointer;
+            border-radius: 10px;
+            transition: all 0.3s;
         }
 
-        .like-button {
-            padding: 5px 10px;
-            background: #eee;
-            border-radius: 20px;
-            transition: background 0.2s;
+        .action-button:hover {
+            background: #f8f9fa;
+            border-color: #dee2e6;
         }
 
-        .like-button:hover {
-            background: #ddd;
+        .action-button.active-dislike {
+            background: linear-gradient(135deg, #ffebee, #ffcdd2);
+            border-color: #dc3545;
+            color: #dc3545;
         }
 
-        .reaction-count {
-            margin-left: 8px;
+        .like-button.active.like {
+            color: #007bff;
             font-weight: bold;
-            color: #444;
+            border-color: #007bff;
+            background: #e3f2fd;
         }
 
-        /* Popup cảm xúc */
+        .like-button.active.love {
+            color: #e0245e;
+            font-weight: bold;
+            border-color: #e0245e;
+            background: #fce4ec;
+        }
+
+        .like-button.active.care {
+            color: #f7b125;
+            font-weight: bold;
+            border-color: #f7b125;
+            background: #fff8e1;
+        }
+
+        .like-button.active.haha {
+            color: #f7b125;
+            font-weight: bold;
+            border-color: #f7b125;
+            background: #fff8e1;
+        }
+
+        .like-button.active.wow {
+            color: #f7b125;
+            font-weight: bold;
+            border-color: #f7b125;
+            background: #fff8e1;
+        }
+
+        .like-button.active.sad {
+            color: #f7b125;
+            font-weight: bold;
+            border-color: #f7b125;
+            background: #fff8e1;
+        }
+
+        .like-button.active.angry {
+            color: #e0245e;
+            font-weight: bold;
+            border-color: #e0245e;
+            background: #fce4ec;
+        }
+
+        .reaction-box {
+            position: relative;
+            flex: 1;
+        }
+
+        .reaction-box .action-button {
+            width: 100%;
+        }
+
         .reaction-popup {
-            display: none;
             position: absolute;
-            bottom: 40px;
+            bottom: 100%;
             left: 0;
-            background: #fff;
-            border-radius: 30px;
-            padding: 5px 10px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            margin-bottom: 10px;
+            background-color: white;
+            border-radius: 50px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+            padding: 5px;
+            display: none;
+            align-items: center;
+            gap: 5px;
+            z-index: 10;
+            transition: all 0.2s ease-out;
         }
 
-        .reaction-popup .reaction {
-            font-size: 22px;
-            margin: 0 5px;
+        .reaction-popup.show {
+            display: flex;
+            animation: popup-appear 0.2s ease-out forwards;
+        }
+
+        .reaction {
+            font-size: 28px;
             cursor: pointer;
-            transition: transform 0.2s;
+            transition: transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            padding: 5px;
         }
 
-
-        .reaction-popup .reaction:hover {
+        .reaction:hover {
             transform: scale(1.3);
+        }
+
+        @keyframes popup-appear {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .btn {
@@ -479,15 +574,6 @@ function tinh_kich_thuoc_file($duong_dan_file)
             box-shadow: 0 3px 10px rgba(40, 167, 69, 0.3);
         }
 
-        .btn-secondary {
-            background: #6c757d;
-            color: white;
-        }
-
-        .btn-secondary:hover {
-            background: #5a6268;
-        }
-
         .loading-preview {
             display: flex;
             flex-direction: column;
@@ -496,64 +582,6 @@ function tinh_kich_thuoc_file($duong_dan_file)
             height: 400px;
             color: #6c757d;
         }
-
-        .comment-box {
-            display: flex;
-            align-items: flex-start;
-            gap: 10px;
-            margin-top: 20px;
-            padding: 15px;
-            background: #f9f9f9;
-            border: 1px solid #ddd;
-            border-radius: 10px;
-        }
-
-        .comment-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-        }
-
-        .comment-content {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .comment-input {
-            width: 100%;
-            min-height: 60px;
-            resize: vertical;
-            padding: 10px 12px;
-            border-radius: 6px;
-            border: 1px solid #ccc;
-            font-size: 14px;
-            outline: none;
-            transition: border-color 0.3s;
-        }
-
-        .comment-input:focus {
-            border-color: #007bff;
-        }
-
-        .comment-send {
-            align-self: flex-end;
-            margin-top: 8px;
-            padding: 8px 16px;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 500;
-            transition: background-color 0.3s;
-        }
-
-        .comment-send:hover {
-            background-color: #0056b3;
-        }
-
-
 
         .loading-spinner {
             width: 40px;
@@ -573,6 +601,120 @@ function tinh_kich_thuoc_file($duong_dan_file)
             100% {
                 transform: rotate(360deg);
             }
+        }
+
+        /* ==================== COMMENT STYLES ==================== */
+        .comments-section {
+            padding: 25px;
+            background: #fafafa;
+            border-top: 1px solid #e9ecef;
+        }
+
+        .comments-header {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .comment-input-container {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 25px;
+        }
+
+        .comment-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #28a745, #1e7e34);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+
+        .comment-input {
+            flex: 1;
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 25px;
+            padding: 12px 20px;
+            font-size: 14px;
+            outline: none;
+            transition: all 0.3s;
+            resize: vertical;
+            min-height: 45px;
+        }
+
+        .comment-input:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+        }
+
+        .comment-list {
+            margin-top: 20px;
+        }
+
+        .comment-item {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            padding: 12px;
+            border-radius: 8px;
+            transition: background-color 0.3s;
+        }
+
+        .comment-item:hover {
+            background-color: #f8f9fa;
+        }
+
+        .comment-content-wrapper {
+            flex: 1;
+        }
+
+        .comment-bubble {
+            background: white;
+            padding: 10px 15px;
+            border-radius: 18px;
+            display: inline-block;
+            max-width: 100%;
+        }
+
+        .comment-author {
+            font-weight: 600;
+            color: #050505;
+            margin-bottom: 5px;
+        }
+
+        .comment-text {
+            color: #050505;
+            margin: 5px 0 0 0;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .comment-meta {
+            padding: 5px 15px;
+            font-size: 12px;
+            color: #65676b;
+        }
+
+        .delete-comment {
+            margin-left: 15px;
+            color: #dc3545;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .delete-comment:hover {
+            text-decoration: underline;
         }
 
         @media (max-width: 1024px) {
@@ -606,40 +748,6 @@ function tinh_kich_thuoc_file($duong_dan_file)
                 min-height: 400px;
             }
         }
-
-        .comment-list {
-            margin-top: 20px;
-        }
-
-        .comment-item {
-            padding: 10px;
-            margin-bottom: 10px;
-            border-radius: 8px;
-            transition: background-color 0.3s;
-        }
-
-        .comment-item:hover {
-            background-color: #f8f9fa;
-        }
-
-        .reaction-detail {
-            margin-top: 10px;
-            padding: 8px 0;
-            font-size: 14px;
-        }
-
-        .reaction-item {
-            display: inline-block;
-            margin-right: 15px;
-            padding: 4px 10px;
-            background: #f0f2f5;
-            border-radius: 12px;
-            font-size: 13px;
-        }
-
-        .reaction-count {
-            transition: transform 0.2s;
-        }
     </style>
 </head>
 
@@ -647,7 +755,6 @@ function tinh_kich_thuoc_file($duong_dan_file)
     <div class="container">
         <div class="header">
             <div class="breadcrumb">
-
                 <a href="index.php?page=monhoc">Danh sách môn học</a> /
                 <a href="index.php?page=tailieumon&id_mon_hoc=<?php echo $tai_lieu['id_mon_hoc']; ?>">
                     <?php echo lam_sach_chuoi($tai_lieu['ten_mon']); ?>
@@ -666,7 +773,6 @@ function tinh_kich_thuoc_file($duong_dan_file)
 
         <div class="main-content">
             <div class="preview-section">
-
                 <div class="preview-container">
                     <div class="loading-preview" id="loading-preview">
                         <div class="loading-spinner"></div>
@@ -751,154 +857,105 @@ function tinh_kich_thuoc_file($duong_dan_file)
 
                     <?php if (!empty($tai_lieu['mo_ta'])): ?>
                         <div class="description-section">
-                            <h3>📖 Mô tả chi tiết</h3>
+                            <h3>Mô tả</h3>
                             <div class="description-text">
                                 <?php echo lam_sach_chuoi($tai_lieu['mo_ta']); ?>
                             </div>
                         </div>
-                        <!-- Nút Like -->
-                        <!-- Nút Like -->
-                        <!-- Nút Like -->
-                        <!-- Nút Like -->
+                    <?php endif; ?>
 
-                        <div class="reaction-box" data-id="<?php echo $tai_lieu['id']; ?>">
-                            <!-- Nút Like -->
-                            <div class="like-button">
-                                👍 <span class="like-text">Thích</span>
-                            </div>
+                    <!-- ==================== REACTION & STATS ==================== -->
+                    <div class="post-stats" data-post-id="<?= $tai_lieu['id'] ?>">
+                        <div class="reaction-summary">
+                            <div class="reaction-icons"></div>
+                            <span class="reaction-count"></span>
+                        </div>
+                        <div class="right-stats" style="display: flex; gap: 15px;">
+                            <span class="dislike-count"></span>
+                            <span class="comment-count">💬 <?= count($comments ?? []) ?> bình luận</span>
+                        </div>
+                    </div>
 
-                            <!-- Số lượt tương tác -->
-                            <span class="reaction-count">
-                                <?php echo lay_tong_reaction($pdo, $tai_lieu['id']); ?>
-                            </span>
-
-                            <!-- Popup cảm xúc -->
+                    <!-- ==================== ACTION BUTTONS ==================== -->
+                    <div class="post-actions">
+                        <div class="reaction-box">
                             <div class="reaction-popup">
                                 <span class="reaction" data-type="like">👍</span>
                                 <span class="reaction" data-type="love">❤️</span>
+                                <span class="reaction" data-type="care">🤗</span>
                                 <span class="reaction" data-type="haha">😆</span>
                                 <span class="reaction" data-type="wow">😮</span>
                                 <span class="reaction" data-type="sad">😢</span>
                                 <span class="reaction" data-type="angry">😡</span>
                             </div>
-                        </div> <!-- Kết thúc .reaction-box -->
-                        <?php
-                        // Lấy chi tiết reaction cho tài liệu hiện tại
-                        $chiTiet = lay_chi_tiet_reaction($pdo, $tai_lieu['id']);
-                        $tong = $chiTiet ? array_sum($chiTiet) : 0;
-                        ?>
-                        <!-- Tách chi tiết reaction ra dưới -->
-                        <div class="reaction-detail">
-                            <?php foreach ($chiTiet as $loai => $sl): ?>
-                                <?php if ($sl > 0): ?>
-                                    <span class="reaction-item">
-                                        <?= htmlspecialchars($loai) ?>: <?= $sl ?>
-                                    </span>
-                                <?php endif; ?>
-                            <?php endforeach; ?>
+                            <button class="action-button like-button">
+                                <span>👍</span> Thích
+                            </button>
                         </div>
-                        <!-- Nút Like --> <!-- Nút Like --> <!-- Nút Like --> <!-- Nút Like --> <!-- Nút Like -->
-                        <!-- Nút Like --> <!-- Nút Like --> <!-- Nút Like --> <!-- Nút Like --> <!-- Nút Like -->
-                        <!-- Nút Like --> <!-- Nút Like -->
+                        <button class="action-button dislike-button">
+                            <span>👎</span> Không thích
+                        </button>
+                        <button class="action-button" id="commentBtn">
+                            <span>💬</span> Bình luận
+                        </button>
+                        <button class="action-button share-button" onclick="copyLink()">
+                            <span>📤</span> Chia sẻ
+                        </button>
+                    </div>
 
+                    <!-- ==================== COMMENTS SECTION ==================== -->
+                    <div class="comments-section">
+                        <h3 class="comments-header">💬 Bình luận (<?= count($comments) ?>)</h3>
 
-                        <!-- Nút copy link -->
-                        <button class="share-btn" onclick="copyLink()">📋 Copy link</button>
-
-                        <script>
-                            function copyLink() {
-                                var link = "<?php echo 'http://' . $_SERVER['HTTP_HOST'] . '/BTL/index.php?page=chitiettailieu&id=' . $id_bai_chia_se; ?>";
-
-                                navigator.clipboard.writeText(link).then(function() {
-                                    alert("✅ Link đã được copy: " + link);
-                                }).catch(function(err) {
-                                    console.error("❌ Không copy được: ", err);
-                                    alert("Trình duyệt không hỗ trợ copy.");
-                                });
-                            }
-                        </script>
-
-
-
-                        <?php
-
-
-                        $id_bai_chia_se = (int)($_GET['id'] ?? 0);
-
-                        // Lấy danh sách comment (có thêm id để xoá, id_nguoi_dung để check quyền)
-                        $sql = "SELECT bl.id, bl.noi_dung, bl.ngay_tao, bl.id_nguoi_dung, nd.ho_ten
-        FROM binh_luan bl
-        JOIN nguoi_dung nd ON bl.id_nguoi_dung = nd.id
-        WHERE bl.id_bai_chia_se = :id_bai_chia_se
-        ORDER BY bl.ngay_tao DESC";
-
-                        $stmt = $pdo->prepare($sql);
-                        $stmt->execute([':id_bai_chia_se' => $id_bai_chia_se]);
-                        $comments = $stmt->fetchAll();
-                        ?>
-
-                        <!-- Form nhập comment -->
-                        <div class="comment-box">
-                            <img src="https://i.pravatar.cc/40" alt="Avatar" class="comment-avatar">
-                            <div class="comment-content">
-                                <form method="POST" action="comment.php">
-                                    <textarea name="noi_dung" class="comment-input" placeholder="Viết bình luận..." required></textarea>
-                                    <input type="hidden" name="id_bai_chia_se" value="<?php echo $id_bai_chia_se; ?>">
-                                    <button type="submit" class="comment-send">Gửi</button>
-                                </form>
-                            </div>
-                        </div>
-
-                        <!-- Hiển thị danh sách bình luận -->
-                        <div class="comment-list">
-                            <?php foreach ($comments as $c): ?>
-                                <div class="comment-item">
-                                    <b><?php echo htmlspecialchars($c['ho_ten']); ?></b>:
-                                    <?php echo nl2br(htmlspecialchars($c['noi_dung'])); ?>
-                                    <br>
-                                    <small><?php echo dinh_dang_ngay($c['ngay_tao']); ?></small>
-
-                                    <?php if (isset($_SESSION['user_id']) && $_SESSION['user_id'] == $c['id_nguoi_dung']): ?>
-                                        <!-- Nút xoá chỉ hiện với chủ comment -->
-                                        <a href="comment.php?delete=<?php echo $c['id']; ?>&id_bai=<?php echo $id_bai_chia_se; ?>"
-                                            onclick="return confirm('Bạn có chắc muốn xoá bình luận này?')"
-                                            class="delete-comment">Xoá</a>
-                                    <?php endif; ?>
+                        <?php if ($is_logged_in): ?>
+                            <div class="comment-input-container">
+                                <div class="comment-avatar">
+                                    <?= strtoupper(substr($username, 0, 1)) ?>
                                 </div>
-                            <?php endforeach; ?>
-                        </div>
+                                <textarea
+                                    class="comment-input"
+                                    placeholder="Viết bình luận..."
+                                    rows="1"></textarea>
+                            </div>
+                        <?php else: ?>
+                            <div style="text-align: center; padding: 20px; background: white; border-radius: 12px;">
+                                <p style="color: #666; margin-bottom: 10px;">Đăng nhập để bình luận</p>
+                                <a href="index.php?page=login" class="btn btn-primary">Đăng nhập</a>
+                            </div>
+                        <?php endif; ?>
 
-
-
-
-                </div>
-            </div>
-        <?php endif; ?>
-
-        <?php if (!empty($tai_lieu_lien_quan)): ?>
-            <div class="related-section">
-                <h3>🔗 Tài liệu liên quan</h3>
-                <?php foreach ($tai_lieu_lien_quan as $lien_quan): ?>
-                    <div class="related-item"
-                        onclick="window.location.href='index.php?page=chitiettailieu&id=<?php echo $lien_quan['id']; ?>'">
-                        <div class="related-title">
-                            <?php echo lay_icon_file($lien_quan['file_upload']); ?>
-                            <?php echo lam_sach_chuoi($lien_quan['tieu_de']); ?>
-                        </div>
-                        <div class="related-meta">
-                            📅 <?php echo dinh_dang_ngay($lien_quan['ngay_tao']); ?>
-                            <?php if (!empty($lien_quan['tom_tat'])): ?>
-                                <br><?php echo substr(lam_sach_chuoi($lien_quan['tom_tat']), 0, 100); ?>...
+                        <div class="comment-list">
+                            <?php if (empty($comments)): ?>
+                                <p style="text-align:center;color:#999;padding:20px;">Chưa có bình luận nào</p>
                             <?php endif; ?>
                         </div>
                     </div>
-                <?php endforeach; ?>
+
+                    <?php if (!empty($tai_lieu_lien_quan)): ?>
+                        <div class="related-section">
+                            <h3>🔗 Tài liệu liên quan</h3>
+                            <?php foreach ($tai_lieu_lien_quan as $lien_quan): ?>
+                                <div class="related-item"
+                                    onclick="window.location.href='index.php?page=chitiettailieu&id=<?php echo $lien_quan['id']; ?>'">
+                                    <div class="related-title">
+                                        <?php echo lay_icon_file($lien_quan['file_upload']); ?>
+                                        <?php echo lam_sach_chuoi($lien_quan['tieu_de']); ?>
+                                    </div>
+                                    <div class="related-meta">
+                                        📅 <?php echo dinh_dang_ngay($lien_quan['ngay_tao']); ?>
+                                        <?php if (!empty($lien_quan['tom_tat'])): ?>
+                                            <br><?php echo substr(lam_sach_chuoi($lien_quan['tom_tat']), 0, 100); ?>...
+                                        <?php endif; ?>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    <?php endif; ?>
+                </div>
             </div>
-        <?php endif; ?>
         </div>
     </div>
-    </div>
-    </div>
+
     <script>
         // ========== PREVIEW IFRAME ==========
         function hien_thi_preview() {
@@ -908,171 +965,333 @@ function tinh_kich_thuoc_file($duong_dan_file)
 
         document.getElementById('preview-iframe')?.addEventListener('error', function() {
             document.getElementById('loading-preview').innerHTML = `
-        <div style="text-align: center; color: #dc3545;">
-            <h4>❌ Không thể hiển thị preview</h4>
-            <p>File có thể không hỗ trợ xem trước hoặc có vấn đề với kết nối.</p>
-            <a href="<?php echo $tai_lieu['file_upload']; ?>" 
-               class="btn btn-primary" target="_blank">
-                📄 Mở file trực tiếp
-            </a>
-        </div>
-    `;
+                <div style="text-align: center; color: #dc3545;">
+                    <h4>❌ Không thể hiển thị preview</h4>
+                    <p>File có thể không hỗ trợ xem trước hoặc có vấn đề với kết nối.</p>
+                    <a href="<?php echo $tai_lieu['file_upload']; ?>" 
+                       class="btn btn-primary" target="_blank">
+                        📄 Mở file trực tiếp
+                    </a>
+                </div>
+            `;
         });
 
-        // ========== REACTION SYSTEM ==========
-        document.querySelectorAll(".reaction-box").forEach(box => {
-            let timeout;
-            const likeBtn = box.querySelector(".like-button");
-            const popup = box.querySelector(".reaction-popup");
-            const countSpan = box.querySelector(".reaction-count");
-            const detailDiv = box.closest('.tai-lieu-body')?.querySelector('.reaction-detail');
+        // ========== COPY LINK ==========
+        function copyLink() {
+            const link = "<?php echo 'http://' . $_SERVER['HTTP_HOST'] . '/BTL/index.php?page=chitiettailieu&id=' . $id_bai_chia_se; ?>";
 
-            // Hover để hiện popup
-            likeBtn.addEventListener("mouseenter", () => {
-                timeout = setTimeout(() => {
-                    popup.style.display = "flex";
-                }, 500);
-            });
+            navigator.clipboard.writeText(link).then(() => {
+                const btn = event.target.closest('.share-button');
+                const originalHTML = btn.innerHTML;
+                btn.innerHTML = '<span>✅</span> Đã copy!';
+                btn.style.backgroundColor = '#28a745';
+                btn.style.color = 'white';
 
-            likeBtn.addEventListener("mouseleave", () => {
-                clearTimeout(timeout);
-            });
-
-            popup.addEventListener("mouseleave", () => {
-                popup.style.display = "none";
-            });
-
-            // Click vào reaction
-            popup.querySelectorAll(".reaction").forEach(r => {
-                r.addEventListener("click", () => {
-                    const type = r.dataset.type;
-                    const postId = box.dataset.id;
-
-                    // Hiển thị loading
-                    const originalText = countSpan.textContent;
-                    countSpan.textContent = "...";
-
-                    fetch("src/Views/ajax_reaction.php", {
-                            method: "POST",
-                            credentials: "same-origin",
-                            headers: {
-                                "Content-Type": "application/x-www-form-urlencoded"
-                            },
-                            body: "id_bai=" + postId + "&type=" + type
-                        })
-                        .then(res => res.json())
-                        .then(data => {
-                            if (data.success) {
-                                // Cập nhật tổng số
-                                countSpan.textContent = data.tong;
-
-                                // Cập nhật chi tiết
-                                if (detailDiv && data.chi_tiet) {
-                                    let html = '';
-                                    const emojiMap = {
-                                        'like': '👍',
-                                        'love': '❤️',
-                                        'care': '🤗',
-                                        'haha': '😆',
-                                        'wow': '😮',
-                                        'sad': '😢',
-                                        'angry': '😡'
-                                    };
-
-                                    for (let [loai, sl] of Object.entries(data.chi_tiet)) {
-                                        if (sl > 0) {
-                                            html += `<span class="reaction-item">${emojiMap[loai] || loai} ${sl}</span> `;
-                                        }
-                                    }
-                                    detailDiv.innerHTML = html;
-                                }
-
-                                // Hiệu ứng animation
-                                countSpan.style.transform = 'scale(1.3)';
-                                setTimeout(() => {
-                                    countSpan.style.transform = 'scale(1)';
-                                }, 200);
-
-                                popup.style.display = "none";
-                            } else {
-                                alert('❌ ' + (data.error || 'Có lỗi xảy ra'));
-                                countSpan.textContent = originalText;
-                            }
-                        })
-                        .catch(err => {
-                            console.error(err);
-                            alert('⚠️ Không kết nối được server');
-                            countSpan.textContent = originalText;
-                        });
-                });
-            });
-        });
-
-        // ========== COMMENT SYSTEM ==========
-        const commentForm = document.querySelector('.comment-box form');
-        const commentList = document.querySelector('.comment-list');
-        const commentInput = document.querySelector('.comment-input');
-        const idBaiChiaSe = <?php echo $id_bai_chia_se; ?>;
-
-        // Tải danh sách comment khi trang load
-        loadComments();
-
-        // Gửi comment
-        if (commentForm) {
-            commentForm.addEventListener('submit', function(e) {
-                e.preventDefault();
-
-                const noiDung = commentInput.value.trim();
-                if (!noiDung) {
-                    alert('Vui lòng nhập nội dung bình luận');
-                    return;
-                }
-
-                const submitBtn = this.querySelector('.comment-send');
-                submitBtn.disabled = true;
-                submitBtn.textContent = '⏳ Đang gửi...';
-
-                fetch('src/Views/comment.php', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/x-www-form-urlencoded'
-                        },
-                        body: 'ajax=1&noi_dung=' + encodeURIComponent(noiDung) +
-                            '&id_bai_chia_se=' + idBaiChiaSe
-                    })
-                    .then(res => res.json())
-                    .then(data => {
-                        if (data.success) {
-                            // Thêm comment mới vào đầu danh sách
-                            addCommentToList(data.comment, true);
-                            commentInput.value = '';
-
-                            // Hiệu ứng thành công
-                            submitBtn.textContent = '✅ Đã gửi!';
-                            setTimeout(() => {
-                                submitBtn.textContent = 'Gửi';
-                                submitBtn.disabled = false;
-                            }, 1500);
-                        } else {
-                            alert('❌ ' + data.message);
-                            submitBtn.textContent = 'Gửi';
-                            submitBtn.disabled = false;
-                        }
-                    })
-                    .catch(err => {
-                        console.error(err);
-                        alert('⚠️ Không kết nối được server');
-                        submitBtn.textContent = 'Gửi';
-                        submitBtn.disabled = false;
-                    });
+                setTimeout(() => {
+                    btn.innerHTML = originalHTML;
+                    btn.style.backgroundColor = '';
+                    btn.style.color = '';
+                }, 2000);
+            }).catch(err => {
+                console.error("Không copy được: ", err);
+                alert("Trình duyệt không hỗ trợ copy.");
             });
         }
 
-        // Tải danh sách comment
+        // ========== REACTION SYSTEM ==========
+        document.addEventListener('DOMContentLoaded', function() {
+            const postStats = document.querySelector('.post-stats');
+            if (!postStats) return;
+
+            const postId = postStats.dataset.postId;
+            const likeButton = document.querySelector('.like-button');
+            const dislikeButton = document.querySelector('.dislike-button');
+            const reactionBox = document.querySelector('.reaction-box');
+            const reactionPopup = document.querySelector('.reaction-popup');
+            const reactions = document.querySelectorAll('.reaction');
+            const isLoggedIn = <?= json_encode($is_logged_in) ?>;
+
+            const reactionMap = {
+                like: {
+                    emoji: '👍',
+                    text: 'Thích',
+                    colorClass: 'like'
+                },
+                love: {
+                    emoji: '❤️',
+                    text: 'Yêu thích',
+                    colorClass: 'love'
+                },
+                care: {
+                    emoji: '🤗',
+                    text: 'Thương thương',
+                    colorClass: 'care'
+                },
+                haha: {
+                    emoji: '😆',
+                    text: 'Haha',
+                    colorClass: 'haha'
+                },
+                wow: {
+                    emoji: '😮',
+                    text: 'Wow',
+                    colorClass: 'wow'
+                },
+                sad: {
+                    emoji: '😢',
+                    text: 'Buồn',
+                    colorClass: 'sad'
+                },
+                angry: {
+                    emoji: '😡',
+                    text: 'Phẫn nộ',
+                    colorClass: 'angry'
+                }
+            };
+
+            let currentUserState = {
+                reaction: <?= json_encode($tai_lieu['user_reaction'] ?? null) ?>,
+                disliked: <?= json_encode((bool)$tai_lieu['da_dislike']) ?>
+            };
+
+            async function handleInteraction(type) {
+                if (!isLoggedIn) {
+                    alert('Bạn cần đăng nhập để thực hiện hành động này.');
+                    return;
+                }
+
+                try {
+                    const response = await fetch('src/Views/ajax_reaction.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            postId: postId,
+                            type: type
+                        })
+                    });
+
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.error || 'Có lỗi xảy ra.');
+                    }
+
+                    const data = await response.json();
+                    if (data.success) {
+                        currentUserState = data.user_status;
+                        updateUI(data);
+                    } else {
+                        throw new Error(data.error);
+                    }
+                } catch (error) {
+                    console.error('Lỗi tương tác:', error);
+                    alert('Lỗi: ' + error.message);
+                }
+            }
+
+            function updateUI(data) {
+                // Update like button
+                likeButton.classList.remove('active', ...Object.values(reactionMap).map(r => r.colorClass));
+                if (currentUserState.reaction && reactionMap[currentUserState.reaction]) {
+                    const reactionInfo = reactionMap[currentUserState.reaction];
+                    likeButton.classList.add('active', reactionInfo.colorClass);
+                    likeButton.innerHTML = `<span>${reactionInfo.emoji}</span> ${reactionInfo.text}`;
+                } else {
+                    likeButton.innerHTML = `<span>👍</span> Thích`;
+                }
+
+                // Update dislike button
+                dislikeButton.classList.toggle('active-dislike', currentUserState.disliked);
+
+                // Update reaction display
+                const {
+                    reactions,
+                    dislikes
+                } = data;
+                const reactionIconsContainer = document.querySelector('.reaction-icons');
+                const reactionCountSpan = document.querySelector('.reaction-count');
+                const dislikeCountSpan = document.querySelector('.dislike-count');
+
+                reactionIconsContainer.innerHTML = '';
+                if (reactions.details) {
+                    const sortedReactions = Object.keys(reactions.details).sort((a, b) => {
+                        const order = ['love', 'like', 'care', 'haha', 'wow', 'sad', 'angry'];
+                        return order.indexOf(a) - order.indexOf(b);
+                    });
+                    sortedReactions.forEach(type => {
+                        if (reactionMap[type]) {
+                            const iconSpan = document.createElement('span');
+                            iconSpan.className = 'reaction-icon';
+                            iconSpan.textContent = reactionMap[type].emoji;
+                            reactionIconsContainer.appendChild(iconSpan);
+                        }
+                    });
+                }
+                reactionCountSpan.textContent = reactions.total > 0 ? reactions.total : '';
+                dislikeCountSpan.textContent = dislikes.total > 0 ? `👎 ${dislikes.total}` : '';
+            }
+
+            // Reaction popup hover
+            let hideTimeout;
+
+            reactionBox.addEventListener('mouseenter', () => {
+                clearTimeout(hideTimeout);
+                reactionPopup.classList.add('show');
+            });
+
+            reactionBox.addEventListener('mouseleave', () => {
+                hideTimeout = setTimeout(() => {
+                    reactionPopup.classList.remove('show');
+                }, 300);
+            });
+
+            // Reaction click
+            reactions.forEach(reaction => {
+                reaction.addEventListener('click', () => {
+                    const type = reaction.dataset.type;
+                    handleInteraction(type);
+                    reactionPopup.classList.remove('show');
+                });
+            });
+
+            // Like button click
+            likeButton.addEventListener('click', () => {
+                if (currentUserState.reaction) {
+                    handleInteraction('remove_reaction');
+                } else {
+                    handleInteraction('like');
+                }
+            });
+
+            // Dislike button click
+            dislikeButton.addEventListener('click', () => {
+                if (currentUserState.disliked) {
+                    handleInteraction('remove_dislike');
+                } else {
+                    handleInteraction('dislike');
+                }
+            });
+
+            // Initialize UI
+            const initialData = {
+                reactions: {
+                    total: <?= $tai_lieu['tong_so_reaction'] ?? 0 ?>,
+                    details: {
+                        <?php
+                        if (!empty($tai_lieu['chi_tiet_reaction'])) {
+                            $details = [];
+                            $pairs = explode(';', $tai_lieu['chi_tiet_reaction']);
+                            foreach ($pairs as $pair) {
+                                list($key, $value) = explode(':', $pair);
+                                $details[] = '"' . htmlspecialchars($key) . '": ' . (int)$value;
+                            }
+                            echo implode(', ', $details);
+                        }
+                        ?>
+                    }
+                },
+                dislikes: {
+                    total: <?= $tai_lieu['so_luot_dislike'] ?? 0 ?>
+                }
+            };
+            updateUI(initialData);
+        });
+
+        // ========== COMMENT SYSTEM ==========
+        const commentInput = document.querySelector('.comment-input');
+        const commentList = document.querySelector('.comment-list');
+        const idBaiChiaSe = <?php echo $id_tai_lieu; ?>;
+        const isLoggedIn = <?= json_encode($is_logged_in) ?>;
+        const currentUserId = <?= json_encode($userId) ?>;
+
+        // Load comments
+        loadComments();
+
+        // Comment input handler
+        if (commentInput) {
+            // Auto-resize textarea
+            commentInput.addEventListener('input', function() {
+                this.style.height = 'auto';
+                this.style.height = (this.scrollHeight) + 'px';
+            });
+
+            // Submit on Enter (without Shift)
+            commentInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    submitComment();
+                }
+            });
+        }
+
+        // Focus comment input when comment button clicked
+        document.getElementById('commentBtn')?.addEventListener('click', function() {
+            commentInput?.focus();
+        });
+
+        async function submitComment() {
+            if (!isLoggedIn) {
+                alert('Bạn cần đăng nhập để bình luận');
+                return;
+            }
+
+            const noiDung = commentInput.value.trim();
+            if (!noiDung) {
+                alert('Vui lòng nhập nội dung bình luận');
+                return;
+            }
+
+            const originalValue = commentInput.value;
+            commentInput.disabled = true;
+            commentInput.placeholder = '⏳ Đang gửi...';
+
+            try {
+                const response = await fetch('src/Views/comment.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: 'ajax=1&noi_dung=' + encodeURIComponent(noiDung) +
+                        '&id_bai_chia_se=' + idBaiChiaSe
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    addCommentToList(data.comment, true);
+                    commentInput.value = '';
+                    commentInput.style.height = 'auto';
+
+                    // Update comment count
+                    const commentCountSpan = document.querySelector('.comment-count');
+                    if (commentCountSpan) {
+                        const match = commentCountSpan.textContent.match(/\d+/);
+                        const currentCount = match ? parseInt(match[0]) : 0;
+                        commentCountSpan.textContent = `💬 ${currentCount + 1} bình luận`;
+                    }
+
+                    commentInput.placeholder = '✅ Đã gửi!';
+                    setTimeout(() => {
+                        commentInput.placeholder = 'Viết bình luận...';
+                    }, 1500);
+                } else {
+                    alert('❌ ' + data.message);
+                    commentInput.value = originalValue;
+                }
+            } catch (error) {
+                console.error(error);
+                alert('⚠️ Không kết nối được server');
+                commentInput.value = originalValue;
+            } finally {
+                commentInput.disabled = false;
+                commentInput.focus();
+            }
+        }
+
         function loadComments() {
             if (!commentList) return;
 
-            fetch('comment.php?get_comments=1&id_bai=' + idBaiChiaSe)
+            fetch('src/Views/comment.php?get_comments=1&id_bai=' + idBaiChiaSe)
                 .then(res => res.json())
                 .then(data => {
                     if (data.success) {
@@ -1089,11 +1308,10 @@ function tinh_kich_thuoc_file($duong_dan_file)
                 .catch(err => console.error(err));
         }
 
-        // Thêm comment vào danh sách
         function addCommentToList(comment, isNew) {
             if (!commentList) return;
 
-            // Xóa message "chưa có bình luận"
+            // Remove empty message
             const emptyMsg = commentList.querySelector('p');
             if (emptyMsg) emptyMsg.remove();
 
@@ -1109,29 +1327,28 @@ function tinh_kich_thuoc_file($duong_dan_file)
                 }, 100);
             }
 
+            const firstLetter = comment.commenter_name ? comment.commenter_name.charAt(0).toUpperCase() : 'A';
+            const canDelete = isLoggedIn && currentUserId == comment.id_nguoi_dung;
+
             div.innerHTML = `
-        <div style="display: flex; gap: 10px; margin-bottom: 10px;">
-            <img src="https://i.pravatar.cc/40?u=${comment.id_nguoi_dung}" 
-                 alt="Avatar" 
-                 style="width: 40px; height: 40px; border-radius: 50%;">
-            <div style="flex: 1;">
-                <div style="background: #f0f2f5; padding: 10px 15px; border-radius: 18px;">
-                    <b style="color: #050505;">${comment.ho_ten}</b>
-                    <p style="margin: 5px 0 0 0; color: #050505;">${comment.noi_dung.replace(/\n/g, '<br>')}</p>
+                <div class="comment-avatar">${firstLetter}</div>
+                <div class="comment-content-wrapper">
+                    <div class="comment-bubble">
+                        <div class="comment-author">${comment.commenter_name || 'Ẩn danh'}</div>
+                        <p class="comment-text">${comment.noi_dung.replace(/\n/g, '<br>')}</p>
+                    </div>
+                    <div class="comment-meta">
+                        <span>📅 ${comment.ngay_tao}</span>
+                        ${canDelete ? `
+                            <a href="#" 
+                               onclick="deleteComment(${comment.id}); return false;" 
+                               class="delete-comment">
+                               🗑️ Xóa
+                            </a>
+                        ` : ''}
+                    </div>
                 </div>
-                <div style="padding: 5px 15px; font-size: 12px; color: #65676b;">
-                    <span>📅 ${comment.ngay_tao}</span>
-                    ${comment.can_delete ? `
-                        <a href="#" 
-                           onclick="deleteComment(${comment.id}); return false;" 
-                           style="margin-left: 15px; color: #dc3545; text-decoration: none;">
-                           🗑️ Xóa
-                        </a>
-                    ` : ''}
-                </div>
-            </div>
-        </div>
-    `;
+            `;
 
             if (isNew) {
                 commentList.insertBefore(div, commentList.firstChild);
@@ -1140,7 +1357,6 @@ function tinh_kich_thuoc_file($duong_dan_file)
             }
         }
 
-        // Xóa comment
         function deleteComment(commentId) {
             if (!confirm('Bạn có chắc muốn xóa bình luận này?')) return;
 
@@ -1156,14 +1372,20 @@ function tinh_kich_thuoc_file($duong_dan_file)
                 .then(res => res.json())
                 .then(data => {
                     if (data.success) {
-                        // Hiệu ứng xóa
                         commentItem.style.transition = 'all 0.3s';
                         commentItem.style.opacity = '0';
                         commentItem.style.transform = 'translateX(-20px)';
                         setTimeout(() => {
                             commentItem.remove();
 
-                            // Kiểm tra nếu không còn comment
+                            // Update comment count
+                            const commentCountSpan = document.querySelector('.comment-count');
+                            if (commentCountSpan) {
+                                const match = commentCountSpan.textContent.match(/\d+/);
+                                const currentCount = match ? parseInt(match[0]) : 0;
+                                commentCountSpan.textContent = `💬 ${Math.max(0, currentCount - 1)} bình luận`;
+                            }
+
                             if (commentList.children.length === 0) {
                                 commentList.innerHTML = '<p style="text-align:center;color:#999;padding:20px;">Chưa có bình luận nào</p>';
                             }
@@ -1176,26 +1398,6 @@ function tinh_kich_thuoc_file($duong_dan_file)
                     console.error(err);
                     alert('⚠️ Không kết nối được server');
                 });
-        }
-
-        // ========== COPY LINK ==========
-        function copyLink() {
-            const link = "<?php echo 'http://' . $_SERVER['HTTP_HOST'] . '/BTL/index.php?page=chitiettailieu&id=' . $id_bai_chia_se; ?>";
-
-            navigator.clipboard.writeText(link).then(() => {
-                const btn = event.target;
-                const originalText = btn.innerHTML;
-                btn.innerHTML = '✅ Đã copy!';
-                btn.style.backgroundColor = '#28a745';
-
-                setTimeout(() => {
-                    btn.innerHTML = originalText;
-                    btn.style.backgroundColor = '';
-                }, 2000);
-            }).catch(err => {
-                console.error("Không copy được: ", err);
-                alert("Trình duyệt không hỗ trợ copy.");
-            });
         }
     </script>
 </body>

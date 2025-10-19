@@ -49,9 +49,9 @@ if (!function_exists('lam_sach_chuoi')) {
 
     .hero-section {
         position: relative;
-        background: url('/NenTangChiaSeTLHT/public/docbackground.jpg') center/cover no-repeat;
+        background: url('/public/docbackground.jpg') center/cover no-repeat;
         color: white;
-        /* padding: 60px 20px; */
+        padding: 40px 20px;
         text-align: center;
         overflow: hidden;
     }
@@ -75,7 +75,7 @@ if (!function_exists('lam_sach_chuoi')) {
     }
 
     .hero-section h1 {
-        font-size: 2.5em;
+        font-size: 2em;
         margin-bottom: 15px;
         font-weight: 700;
     }
@@ -88,45 +88,30 @@ if (!function_exists('lam_sach_chuoi')) {
 
     .stats-container {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 20px;
+        grid-template-columns: repeat(auto-fit, minmax(50px, 1fr));
+        gap: 5px;
         /* padding: 40px 20px; */
-        background: #f8f9fa;
         max-width: 1200px;
-        margin: -30px auto 0;
-        border-radius: 15px;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        margin: 10px auto 0;
         position: relative;
         z-index: 3;
+        padding-bottom: 5px
     }
 
     .stat-card {
         background: white;
-        padding: 30px 20px;
-        border-radius: 15px;
+        padding: 10px 10px;
+        border-radius: 5px;
         text-align: center;
         box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
-        transition: transform 0.3s, box-shadow 0.3s;
-        border-top: 4px solid #007bff;
-    }
-
-    .stat-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        border: solid 1px lightgrey;
     }
 
     .stat-number {
-        font-size: 2.5em;
+        font-size: 1.3em;
         font-weight: bold;
-        color: #007bff;
-        margin-bottom: 10px;
+        color: #2e2f30ff;
         display: block;
-    }
-
-    .stat-label {
-        color: #6c757d;
-        font-weight: 600;
-        font-size: 1.1em;
     }
 
     .content {
@@ -159,16 +144,16 @@ if (!function_exists('lam_sach_chuoi')) {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 40px;
+        margin-bottom: 10px;
         flex-wrap: wrap;
         gap: 20px;
     }
 
     .search-box {
         flex: 1;
-        min-width: 300px;
-        max-width: 500px;
-        padding: 15px 25px;
+        min-width: 200px;
+        max-width: 300px;
+        padding: 15px 15px;
         border: 2px solid #e1e5e9;
         border-radius: 30px;
         font-size: 16px;
@@ -209,9 +194,16 @@ if (!function_exists('lam_sach_chuoi')) {
 
     .mon-hoc-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
         gap: 30px;
         margin-top: 20px;
+    }
+
+    .mon-hoc-card-link {
+        text-decoration: none;
+        color: inherit;
+        display: block;
+        transition: transform 0.2s ease;
     }
 
     .mon-hoc-card {
@@ -219,13 +211,11 @@ if (!function_exists('lam_sach_chuoi')) {
         border-radius: 15px;
         overflow: hidden;
         box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
-        transition: all 0.3s;
         cursor: pointer;
         border: 2px solid transparent;
     }
 
     .mon-hoc-card:hover {
-        transform: translateY(-5px);
         box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
         border-color: #007bff;
     }
@@ -233,20 +223,24 @@ if (!function_exists('lam_sach_chuoi')) {
     .mon-hoc-header {
         background: linear-gradient(135deg, #007bff, #0056b3);
         color: white;
-        padding: 25px;
+        padding: 15px;
         position: relative;
         overflow: hidden;
+        display: flex;
+        align-items: center;
+
     }
 
-    .mon-hoc-header::before {
-        content: "";
-        position: absolute;
-        top: -50%;
-        right: -50%;
-        width: 200%;
-        height: 200%;
-        background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
-        animation: float 6s ease-in-out infinite;
+    .mon-hoc-empty-state {
+        padding: 12px 0;
+        text-align: center;
+        color: #999;
+        font-style: italic;
+    }
+
+    .mon-hoc-card-disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
     }
 
     @keyframes float {
@@ -264,7 +258,6 @@ if (!function_exists('lam_sach_chuoi')) {
     .mon-hoc-title {
         font-size: 1.3em;
         font-weight: 600;
-        margin-bottom: 8px;
         position: relative;
         z-index: 1;
     }
@@ -277,60 +270,21 @@ if (!function_exists('lam_sach_chuoi')) {
         display: flex;
         align-items: center;
         gap: 5px;
+        padding-left: 5px;
+
     }
 
     .mon-hoc-body {
-        padding: 25px;
+        padding: 15px;
     }
 
     .mon-hoc-description {
         color: #6c757d;
-        margin-bottom: 20px;
+        margin-bottom: 10px;
         line-height: 1.6;
         font-size: 14px;
-    }
-
-    .mon-hoc-actions {
-        display: flex;
-        gap: 12px;
-    }
-
-    .btn {
-        padding: 12px 20px;
-        border: none;
-        border-radius: 20px;
-        text-decoration: none;
-        font-size: 14px;
-        font-weight: 600;
-        transition: all 0.3s;
-        cursor: pointer;
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        flex: 1;
-        justify-content: center;
-        text-align: center;
-    }
-
-    .btn-primary {
-        background: linear-gradient(45deg, #007bff, #0056b3);
-        color: white;
-        box-shadow: 0 3px 10px rgba(0, 123, 255, 0.3);
-    }
-
-    .btn-primary:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 5px 15px rgba(0, 123, 255, 0.4);
-        text-decoration: none;
-        color: white;
-    }
-
-    .btn-outline {
-        background: transparent;
-        color: #6c757d;
-        border: 2px solid #e1e5e9;
-        cursor: not-allowed;
-        opacity: 0.7;
+        max-height: 20px;
+        overflow-y: hidden;
     }
 
     .empty-state,
@@ -354,10 +308,6 @@ if (!function_exists('lam_sach_chuoi')) {
         line-height: 1.6;
     }
 
-    .icon {
-        font-size: 1.2em;
-    }
-
     @media (max-width: 768px) {
         .hero-section {
             padding: 40px 15px;
@@ -378,13 +328,12 @@ if (!function_exists('lam_sach_chuoi')) {
         }
 
         .actions-bar {
-            flex-direction: column;
             align-items: stretch;
         }
 
         .search-box {
             min-width: auto;
-            max-width: none;
+            max-width: auto;
         }
 
         .mon-hoc-grid {
@@ -426,23 +375,20 @@ if (!function_exists('lam_sach_chuoi')) {
 <div class="page-container">
     <div class="hero-section">
         <div class="hero-content">
-            <h1>📚 Thư Viện Tài Liệu</h1>
-            <p>Khám phá kho tài liệu phong phú cho các môn học Công nghệ thông tin</p>
+            <h1>Thư Viện Tài Liệu môn học</h1>
+            <p>Khám phá kho tài liệu phong phú cho các môn học chuyên nghành Công nghệ</p>
         </div>
     </div>
 
     <div class="stats-container">
         <div class="stat-card">
-            <div class="stat-number"><?php echo number_format($thong_ke['tong_mon_hoc'] ?? 0); ?></div>
-            <div class="stat-label">📖 Môn Học</div>
+            <div class="stat-number"><?php echo number_format($thong_ke['tong_mon_hoc'] ?? 0); ?> Môn Học</div>
         </div>
         <div class="stat-card">
-            <div class="stat-number"><?php echo number_format($thong_ke['tong_tai_lieu'] ?? 0); ?></div>
-            <div class="stat-label">📄 Tài Liệu</div>
+            <div class="stat-number"><?php echo number_format($thong_ke['tong_tai_lieu'] ?? 0); ?> Tài Liệu</div>
         </div>
         <div class="stat-card">
-            <div class="stat-number"><?php echo number_format($thong_ke['tong_nguoi_dung'] ?? 0); ?></div>
-            <div class="stat-label">👥 Người Đóng Góp</div>
+            <div class="stat-number"><?php echo number_format($thong_ke['tong_nguoi_dung'] ?? 0); ?> Người Đóng Góp</div>
         </div>
     </div>
 
@@ -453,11 +399,6 @@ if (!function_exists('lam_sach_chuoi')) {
             </div>
         <?php endif; ?>
 
-        <div class="section-header">
-            <h2 class="section-title">Danh Sách Môn Học</h2>
-            <p class="section-subtitle">Chọn môn học để xem và tải xuống tài liệu học tập</p>
-        </div>
-
         <div class="actions-bar">
             <input type="text"
                 class="search-box"
@@ -465,9 +406,9 @@ if (!function_exists('lam_sach_chuoi')) {
                 placeholder="🔍 Tìm kiếm môn học..."
                 onkeyup="tim_kiem_mon_hoc_local()">
 
-            <a href="index.php?page=them_mon" class="btn-small-primary">
+            <!-- <a href="index.php?page=them_mon" class="btn-small-primary">
                 ➕ Thêm môn học mới
-            </a>
+            </a> -->
 
 
             <a href="index.php?page=upload" class="upload-btn">
@@ -486,38 +427,48 @@ if (!function_exists('lam_sach_chuoi')) {
         <?php else: ?>
             <div class="mon-hoc-grid" id="mon-hoc-container">
                 <?php foreach ($danh_sach_mon_hoc as $mon_hoc): ?>
-                    <div class="mon-hoc-card" data-ten-mon="<?php echo strtolower(lam_sach_chuoi($mon_hoc['ten_mon'])); ?>">
-                        <div class="mon-hoc-header">
-                            <div class="mon-hoc-title">
-                                <?php echo lam_sach_chuoi($mon_hoc['ten_mon']); ?>
-                            </div>
-                            <div class="mon-hoc-count">
-                                <span class="icon">📄</span>
-                                <?php echo $mon_hoc['so_luong_tai_lieu']; ?> tài liệu
-                            </div>
-                        </div>
-                        <div class="mon-hoc-body">
-                            <?php if (!empty($mon_hoc['mo_ta'])): ?>
-                                <div class="mon-hoc-description">
-                                    <?php echo lam_sach_chuoi(substr($mon_hoc['mo_ta'], 0, 120)); ?>
-                                    <?php echo strlen($mon_hoc['mo_ta']) > 120 ? '...' : ''; ?>
+                    <?php if ($mon_hoc['so_luong_tai_lieu'] > 0): ?>
+                        <a href="index.php?page=tailieumon&id_mon_hoc=<?php echo $mon_hoc['id']; ?>"
+                            class="mon-hoc-card-link">
+                            <div class="mon-hoc-card" data-ten-mon="<?php echo strtolower(lam_sach_chuoi($mon_hoc['ten_mon'])); ?>">
+                                <div class="mon-hoc-header">
+                                    <div class="mon-hoc-title">
+                                        <?php echo lam_sach_chuoi($mon_hoc['ten_mon']); ?>
+                                    </div>
+                                    <div class="mon-hoc-count">
+                                        <?php echo $mon_hoc['so_luong_tai_lieu']; ?> tài liệu
+                                    </div>
                                 </div>
-                            <?php endif; ?>
-
-                            <div class="mon-hoc-actions">
-                                <?php if ($mon_hoc['so_luong_tai_lieu'] > 0): ?>
-                                    <a href="index.php?page=tailieumon&id_mon_hoc=<?php echo $mon_hoc['id']; ?>"
-                                        class="btn btn-primary">
-                                        <span class="icon">👁️</span> Xem Tài Liệu
-                                    </a>
-                                <?php else: ?>
-                                    <span class="btn btn-outline">
-                                        <span class="icon">🔭</span> Chưa có tài liệu
-                                    </span>
+                                <div class="mon-hoc-body">
+                                    <?php if (!empty($mon_hoc['mo_ta'])): ?>
+                                        <div class="mon-hoc-description">
+                                            <?php echo lam_sach_chuoi(substr($mon_hoc['mo_ta'], 0, 120)); ?>
+                                            <?php echo strlen($mon_hoc['mo_ta']) > 120 ? '...' : ''; ?>
+                                        </div>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                        </a>
+                    <?php else: ?>
+                        <div class="mon-hoc-card mon-hoc-card-disabled" data-ten-mon="<?php echo strtolower(lam_sach_chuoi($mon_hoc['ten_mon'])); ?>">
+                            <div class="mon-hoc-header">
+                                <div class="mon-hoc-title">
+                                    <?php echo lam_sach_chuoi($mon_hoc['ten_mon']); ?>
+                                </div>
+                                <div class="mon-hoc-count">
+                                    <?php echo $mon_hoc['so_luong_tai_lieu']; ?> tài liệu
+                                </div>
+                            </div>
+                            <div class="mon-hoc-body">
+                                <?php if (!empty($mon_hoc['mo_ta'])): ?>
+                                    <div class="mon-hoc-description">
+                                        <?php echo lam_sach_chuoi(substr($mon_hoc['mo_ta'], 0, 120)); ?>
+                                        <?php echo strlen($mon_hoc['mo_ta']) > 120 ? '...' : ''; ?>
+                                    </div>
                                 <?php endif; ?>
                             </div>
                         </div>
-                    </div>
+                    <?php endif; ?>
                 <?php endforeach; ?>
             </div>
 
@@ -533,6 +484,8 @@ if (!function_exists('lam_sach_chuoi')) {
     function tim_kiem_mon_hoc_local() {
         const searchInput = document.getElementById('search-input-local');
         const searchTerm = searchInput.value.toLowerCase().trim();
+
+        // Lấy tất cả card bao gồm cả wrapper link
         const monHocCards = document.querySelectorAll('.mon-hoc-card');
         const noResults = document.getElementById('no-results');
         let hasResults = false;
@@ -541,19 +494,35 @@ if (!function_exists('lam_sach_chuoi')) {
             const tenMon = card.getAttribute('data-ten-mon');
             const shouldShow = tenMon.includes(searchTerm);
 
+            // Tìm phần tử cha (có thể là <a> hoặc <div>)
+            const parentElement = card.closest('.mon-hoc-card-link') || card.parentElement;
+
             if (shouldShow) {
-                card.style.display = 'block';
+                // Hiển thị phần tử cha
+                if (card.closest('.mon-hoc-card-link')) {
+                    card.closest('.mon-hoc-card-link').style.display = 'block';
+                } else {
+                    card.style.display = 'block';
+                }
+
                 hasResults = true;
 
                 if (searchTerm.length > 0) {
                     card.style.transform = 'translateY(-2px)';
                     card.style.boxShadow = '0 5px 20px rgba(0,123,255,0.3)';
+                    card.style.border = '2px solid #007bff';
                 } else {
                     card.style.transform = '';
                     card.style.boxShadow = '';
+                    card.style.border = '2px solid transparent';
                 }
             } else {
-                card.style.display = 'none';
+                // Ẩn phần tử cha
+                if (card.closest('.mon-hoc-card-link')) {
+                    card.closest('.mon-hoc-card-link').style.display = 'none';
+                } else {
+                    card.style.display = 'none';
+                }
             }
         });
 
@@ -564,6 +533,7 @@ if (!function_exists('lam_sach_chuoi')) {
             noResults.style.display = 'block';
         }
     }
+
 
     // Thêm hiệu ứng khi hover vào card
     document.querySelectorAll('.mon-hoc-card').forEach(card => {

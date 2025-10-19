@@ -35,7 +35,7 @@ switch ($page) {
         include "src/Views/dangTaiTaiLieu.php";
         break;
     case 'source':
-        include "src/Views/ThuVienNguon.php";
+        include "src/Views/thuVienNguon.php";
         break;
     case 'source_upload':
         include "src/Views/dangTaiNguon.php";
@@ -73,14 +73,20 @@ switch ($page) {
     case 'thu_vien':
         include "src/Views/ThuVienCaNhan.php";
         break;
+    case 'thu_vien_personal':
+        include "src/Views/ThuVienCaNhan.php";
+        break;
     case 'admin':
         include "src/Views/admin_config/index.php";
         break;
     case 'adminMon':
         include "src/Views/admin_config/mon_hoc.php";
         break;
+    case 'adminDanhmuc':
+        include "src/Views/admin_config/adminDanhmuc.php";
+        break;
     case 'adminBai':
-        include "src/Views/admin_config/bai_viet.php";
+        include "src/Views/admin_config/adminBai.php";
         break;
     case 'adminUser':
         include "src/Views/admin_config/nguoi_dung.php";

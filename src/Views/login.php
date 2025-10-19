@@ -11,7 +11,7 @@ if (!isset($_SESSION['user_id']) && isset($_COOKIE['remember_token'])) {
     $token = $_COOKIE['remember_token'];
 
     try {
-        $stmt = $pdo->prepare("SELECT id, ten_dang_nhap, ho_ten FROM nguoi_dung WHERE remember_token = ? AND trang_thai = 'hoat_dong'");
+        $stmt = $pdo->prepare("SELECT id, ten_dang_nhap, ho_ten, vai_tro FROM nguoi_dung WHERE remember_token = ? AND trang_thai = 'hoat_dong'");
         $stmt->execute([$token]);
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -20,6 +20,7 @@ if (!isset($_SESSION['user_id']) && isset($_COOKIE['remember_token'])) {
             $_SESSION['user_id']  = $user['id'];
             $_SESSION['username'] = $user['ten_dang_nhap'];
             $_SESSION['fullname'] = $user['ho_ten'];
+            $_SESSION['vai_tro']  = $user['vai_tro'];
 
             // Cập nhật ngày hoạt động
             $update = $pdo->prepare("UPDATE nguoi_dung SET ngay_cap_nhat = NOW() WHERE id = ?");
@@ -57,7 +58,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $username = lam_sach_chuoi($username);
             }
 
-            $stmt = $pdo->prepare("SELECT id, ten_dang_nhap, ho_ten, mat_khau, trang_thai FROM nguoi_dung WHERE ten_dang_nhap = ?");
+            $stmt = $pdo->prepare("SELECT id, ten_dang_nhap, ho_ten, mat_khau, trang_thai, vai_tro FROM nguoi_dung WHERE ten_dang_nhap = ?");
             $stmt->execute([$username]);
             $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -70,6 +71,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $_SESSION['user_id']  = $user['id'];
                     $_SESSION['username'] = $user['ten_dang_nhap'];
                     $_SESSION['fullname'] = $user['ho_ten'];
+                    $_SESSION['vai_tro']  = $user['vai_tro'];
 
                     // Cập nhật trạng thái hoạt động
                     $update = $pdo->prepare("UPDATE nguoi_dung SET trang_thai = 'hoat_dong', ngay_cap_nhat = NOW() WHERE id = ?");
@@ -120,7 +122,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             <label for="showPassword" style="display:inline-flex; align-items:center; cursor:pointer; margin-bottom: 15px;">
                 <input type="checkbox" id="showPassword" onclick="togglePassword()" style="width: auto; margin-right: 5px;">
-                Hiện mật khẩu
+                Hiển mật khẩu
             </label>
 
             <label style="display:inline-flex; align-items:center; cursor:pointer; margin-bottom: 15px;">
