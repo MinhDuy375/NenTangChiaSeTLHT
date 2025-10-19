@@ -49,7 +49,7 @@ if (!function_exists('lam_sach_chuoi')) {
 
     .hero-section {
         position: relative;
-        background: url('/public/docbackground.jpg') center/cover no-repeat;
+        background: url('/NenTangChiaSeTLHT/public/docbackground.jpg') center/cover no-repeat;
         color: white;
         padding: 40px 20px;
         text-align: center;

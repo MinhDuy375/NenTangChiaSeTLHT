@@ -69,8 +69,8 @@ if (isset($_SESSION['pending_user']['otp_expire'])) {
 }
 ?>
 
-<div class="container">
-    <div class="form-box">
+<div class="container" style="display: flex; justify-content: center; align-items: center;  ">
+    <div class="form-box" style="width: 500px">
         <h2>Xác nhận OTP</h2>
         <p>Vui lòng nhập mã xác nhận được gửi về email:
             <strong><?= htmlspecialchars($_SESSION['pending_user']['email'] ?? '') ?></strong>
